@@ -10,7 +10,7 @@
 
 ![Agenda semanal del administrador](docs/screenshots/agenda.png)
 
-> **Demo:** _pendiente de publicar en Render._ Entra como administrador con el botón **"Entrar como admin demo"** o con **admin@reservapro.test** / **password**. Cliente demo: **cliente@reservapro.test** / **password**.
+> **Demo:** <https://reservapro.onrender.com>. Entra como administrador con el botón **"Entrar como admin demo"** o con **admin@reservapro.test** / **password**. Cliente demo: **cliente@reservapro.test** / **password**. Está en el plan gratis de Render: la primera visita tras un rato sin uso puede tardar unos 50 segundos, y los datos de demostración se reinician cuando el servicio se duerme.
 
 ## Funciones
 
@@ -94,7 +94,7 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Correos de confirmación, recordatorio y cancelación con URL firmada
 - [x] Panel del administrador con agenda semanal y CRUD de servicios y horarios
 - [x] CI con GitHub Actions y Docker
-- [ ] Publicar la demo
+- [x] Publicar la demo
 - [ ] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp
