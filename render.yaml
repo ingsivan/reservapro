@@ -1,0 +1,31 @@
+# Blueprint for Render (https://render.com/docs/blueprint-spec).
+# Creates the demo as one free Docker web service with a SQLite database.
+# The free plan has no persistent disk, so the demo data is rebuilt on every
+# restart: perfect for a demo where visitors can book and cancel freely.
+services:
+  - type: web
+    name: reservapro
+    runtime: docker
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: APP_KEY
+        sync: false # paste the output of `php artisan key:generate --show`
+      - key: APP_URL
+        sync: false # e.g. https://reservapro.onrender.com
+      - key: APP_NAME
+        value: ReservaPro
+      - key: APP_LOCALE
+        value: es
+      - key: TRUSTED_PROXIES
+        value: "*"
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: MAIL_MAILER
+        value: log
