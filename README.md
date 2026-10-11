@@ -41,7 +41,7 @@
 | Frontend | Livewire 4 (con Alpine), Blade, Tailwind CSS 4, Vite |
 | Base de datos | SQLite en local y en la demo; MySQL o PostgreSQL en producción |
 | Trabajo en segundo plano | Colas (correos) y Scheduler (recordatorios) de Laravel |
-| Pruebas | PHPUnit (76 tests), Pint |
+| Pruebas | PHPUnit (81 tests), Pint |
 | CI/CD | GitHub Actions, Docker, Render |
 
 La única dependencia además de Laravel es Livewire. El calendario de la agenda está hecho con Tailwind, sin librerías de JavaScript.
@@ -73,7 +73,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 76 tests
+php artisan test        # 81 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
