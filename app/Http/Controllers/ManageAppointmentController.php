@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\CancelledBy;
+use App\Models\Appointment;
+use App\Services\AppointmentBooker;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\URL;
+
+/**
+ * Lets a customer see and cancel their appointment from the signed link in
+ * their email, without needing an account.
+ */
+class ManageAppointmentController extends Controller
+{
+    public function show(Appointment $appointment): View
+    {
+        $appointment->load('business', 'service');
+
+        return view('appointments.manage', [
+            'appointment' => $appointment,
+            'cancelUrl' => URL::signedRoute('appointments.cancel', ['appointment' => $appointment->code]),
+        ]);
+    }
+
+    public function cancel(Appointment $appointment, AppointmentBooker $booker): RedirectResponse
+    {
+        $appointment->load('business.owner', 'service');
+
+        if (! $appointment->canBeCancelledByCustomer()) {
+            return redirect($appointment->manageUrl())
+                ->with('error', 'Esta cita ya no se puede cancelar en línea. Comunícate directamente con el negocio.');
+        }
+
+        $booker->cancel($appointment, CancelledBy::Customer);
+
+        return redirect($appointment->manageUrl())->with('status', 'Tu cita fue cancelada. El negocio ya fue avisado.');
+    }
+}
