@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\AppointmentStatus;
+use App\Enums\CancelledBy;
+use App\Exceptions\SlotUnavailableException;
+use App\Models\Appointment;
+use App\Models\Business;
+use App\Models\Service;
+use App\Models\User;
+use App\Notifications\AppointmentBooked;
+use App\Notifications\AppointmentCancelled;
+use App\Notifications\AppointmentConfirmed;
+use App\Notifications\NewAppointmentForBusiness;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+
+/**
+ * Creates, confirms and cancels appointments, and sends the matching emails.
+ */
+class AppointmentBooker
+{
+    public function __construct(private AvailabilityService $availability) {}
+
+    /**
+     * Book a slot without ever creating two appointments at the same time.
+     *
+     * The business row is locked inside the transaction, so two customers
+     * booking the same business are handled one after the other. The second
+     * one sees the first appointment and gets a SlotUnavailableException.
+     * On SQLite, the connection uses IMMEDIATE transactions for the same effect.
+     *
+     * @param  array{customer_name: string, customer_email: string, customer_phone?: ?string, notes?: ?string}  $customer
+     *
+     * @throws SlotUnavailableException
+     */
+    public function book(Service $service, CarbonImmutable $startsAt, array $customer, ?User $user = null): Appointment
+    {
+        $appointment = DB::transaction(function () use ($service, $startsAt, $customer, $user) {
+            $business = Business::whereKey($service->business_id)->lockForUpdate()->firstOrFail();
+            $service->setRelation('business', $business);
+
+            if (! $service->is_active || ! $this->availability->isAvailable($service, $startsAt)) {
+                throw new SlotUnavailableException;
+            }
+
+            $status = $business->requires_confirmation ? AppointmentStatus::Pending : AppointmentStatus::Confirmed;
+
+            return $business->appointments()->create([
+                'service_id' => $service->id,
+                'user_id' => $user?->id,
+                'customer_name' => $customer['customer_name'],
+                'customer_email' => $customer['customer_email'],
+                'customer_phone' => $customer['customer_phone'] ?? null,
+                'notes' => $customer['notes'] ?? null,
+                'starts_at' => $startsAt->utc(),
+                'ends_at' => $startsAt->addMinutes($service->duration_minutes)->utc(),
+                'status' => $status,
+                'price_cents' => $service->price_cents,
+                'confirmed_at' => $status === AppointmentStatus::Confirmed ? now() : null,
+            ]);
+        });
+
+        $appointment->load('business.owner', 'service');
+
+        Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
+            ->notify(new AppointmentBooked($appointment));
+        $appointment->business->owner->notify(new NewAppointmentForBusiness($appointment));
+
+        return $appointment;
+    }
+
+    public function confirm(Appointment $appointment): void
+    {
+        if ($appointment->status !== AppointmentStatus::Pending) {
+            return;
+        }
+
+        $appointment->update([
+            'status' => AppointmentStatus::Confirmed,
+            'confirmed_at' => now(),
+        ]);
+
+        Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
+            ->notify(new AppointmentConfirmed($appointment));
+    }
+
+    /**
+     * Cancel an active appointment and tell the other side.
+     */
+    public function cancel(Appointment $appointment, CancelledBy $cancelledBy): void
+    {
+        if (! $appointment->status->isActive()) {
+            return;
+        }
+
+        $appointment->update([
+            'status' => AppointmentStatus::Cancelled,
+            'cancelled_at' => now(),
+            'cancelled_by' => $cancelledBy,
+        ]);
+
+        if ($cancelledBy === CancelledBy::Business) {
+            Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
+                ->notify(new AppointmentCancelled($appointment));
+        } else {
+            $appointment->business->owner->notify(new AppointmentCancelled($appointment));
+        }
+    }
+}
