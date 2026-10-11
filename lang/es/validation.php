@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * Spanish validation messages for the rules this app uses.
+ * Anything missing falls back to the English defaults.
+ */
+return [
+    'after' => 'La :attribute debe ser posterior a :date.',
+    'after_or_equal' => 'La :attribute debe ser igual o posterior a :date.',
+    'before_or_equal' => 'La :attribute debe ser igual o anterior a :date.',
+    'boolean' => 'El campo :attribute debe ser verdadero o falso.',
+    'confirmed' => 'La confirmación de :attribute no coincide.',
+    'date' => 'La :attribute no es una fecha válida.',
+    'date_format' => 'El campo :attribute debe tener el formato :format.',
+    'different' => ':attribute y :other deben ser distintos.',
+    'email' => 'Escribe un correo válido.',
+    'enum' => 'El valor de :attribute no es válido.',
+    'exists' => 'El valor de :attribute no es válido.',
+    'in' => 'El valor de :attribute no es válido.',
+    'integer' => 'El campo :attribute debe ser un número entero.',
+    'lowercase' => 'El campo :attribute debe estar en minúsculas.',
+    'max' => [
+        'numeric' => 'El campo :attribute no puede ser mayor que :max.',
+        'string' => 'El campo :attribute no puede tener más de :max caracteres.',
+    ],
+    'min' => [
+        'numeric' => 'El campo :attribute debe ser al menos :min.',
+        'string' => 'El campo :attribute debe tener al menos :min caracteres.',
+    ],
+    'numeric' => 'El campo :attribute debe ser un número.',
+    'password' => [
+        'letters' => 'La :attribute debe contener al menos una letra.',
+        'mixed' => 'La :attribute debe contener mayúsculas y minúsculas.',
+        'numbers' => 'La :attribute debe contener al menos un número.',
+        'symbols' => 'La :attribute debe contener al menos un símbolo.',
+        'uncompromised' => 'Esta :attribute apareció en una filtración de datos. Elige otra.',
+    ],
+    'regex' => 'El formato de :attribute no es válido.',
+    'required' => 'El campo :attribute es obligatorio.',
+    'required_if' => 'El campo :attribute es obligatorio.',
+    'string' => 'El campo :attribute debe ser texto.',
+    'timezone' => 'La :attribute no es válida.',
+    'unique' => 'Ya existe un registro con ese :attribute.',
+
+    'custom' => [
+        'email' => [
+            'unique' => 'Ya existe una cuenta con ese correo.',
+        ],
+        'slug' => [
+            'unique' => 'Esa dirección ya la usa otro negocio.',
+            'regex' => 'Usa solo minúsculas, números y guiones.',
+        ],
+    ],
+
+    'attributes' => [
+        'name' => 'nombre',
+        'email' => 'correo',
+        'password' => 'contraseña',
+        'account_type' => 'tipo de cuenta',
+        'business_name' => 'nombre del negocio',
+        'customer_name' => 'nombre',
+        'customer_email' => 'correo',
+        'customer_phone' => 'teléfono',
+        'notes' => 'notas',
+        'description' => 'descripción',
+        'duration_minutes' => 'duración',
+        'price' => 'precio',
+        'opens_at' => 'hora de apertura',
+        'closes_at' => 'hora de cierre',
+        'date' => 'fecha',
+        'reason' => 'motivo',
+        'slug' => 'dirección',
+        'address' => 'dirección',
+        'phone' => 'teléfono',
+        'timezone' => 'zona horaria',
+        'slot_interval_minutes' => 'intervalo',
+        'min_notice_minutes' => 'anticipación mínima',
+        'booking_window_days' => 'días de reserva',
+        'cancellation_notice_hours' => 'aviso para cancelar',
+        'form.name' => 'nombre',
+        'form.description' => 'descripción',
+        'form.duration_minutes' => 'duración',
+        'form.price' => 'precio',
+        'newDay' => 'día',
+        'newOpensAt' => 'hora de apertura',
+        'newClosesAt' => 'hora de cierre',
+        'blockedDate' => 'fecha',
+        'blockedReason' => 'motivo',
+    ],
+];
