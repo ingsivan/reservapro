@@ -40,7 +40,7 @@ class AppointmentBooked extends Notification implements ShouldQueue
             ->line("**Fecha:** {$appointment->whenLabel()}")
             ->line("**Precio:** {$appointment->formattedPrice()}")
             ->line("**Código:** {$appointment->code}")
-            ->action('Ver o cancelar mi cita', $appointment->manageUrl())
-            ->line("Si no puedes asistir, cancela con al menos {$appointment->business->cancellation_notice_hours} horas de anticipación.");
+            ->action('Ver, cambiar o cancelar mi cita', $appointment->manageUrl())
+            ->line("Si no puedes asistir, cambia el horario o cancela con al menos {$appointment->business->cancellation_notice_hours} horas de anticipación.");
     }
 }

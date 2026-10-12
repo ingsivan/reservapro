@@ -97,7 +97,7 @@
                     </div>
 
                     <div class="mt-6 flex flex-wrap gap-3 border-t border-slate-100 pt-6">
-                        <a href="{{ $appointment->manageUrl() }}" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Ver o cancelar mi cita</a>
+                        <a href="{{ $appointment->manageUrl() }}" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Ver, cambiar o cancelar mi cita</a>
                         <button type="button" wire:click="startOver" class="rounded-lg px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50">Reservar otra cita</button>
                     </div>
                 </section>
