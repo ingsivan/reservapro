@@ -4,10 +4,12 @@ namespace App\Livewire\Admin;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
+use App\Exceptions\SlotUnavailableException;
 use App\Livewire\Concerns\ManagesBusiness;
 use App\Livewire\Concerns\ShowsNotices;
 use App\Models\Appointment;
 use App\Services\AppointmentBooker;
+use App\Services\AvailabilityService;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
@@ -37,6 +39,14 @@ class Agenda extends Component
 
     /** Appointment open in the side panel. */
     public ?int $openAppointmentId = null;
+
+    /** Whether the side panel shows the picker to move the open appointment. */
+    public bool $rescheduling = false;
+
+    public ?string $rescheduleDate = null;
+
+    /** New start time as an ISO 8601 string with the business's offset. */
+    public ?string $rescheduleStartsAt = null;
 
     public function mount(): void
     {
@@ -72,13 +82,78 @@ class Agenda extends Component
     public function viewAppointment(int $appointmentId): void
     {
         $this->openAppointmentId = $this->findAppointment($appointmentId)->id;
-        unset($this->openAppointment);
+        $this->stopRescheduling();
     }
 
     public function closeAppointment(): void
     {
         $this->openAppointmentId = null;
+        $this->stopRescheduling();
         unset($this->openAppointment);
+    }
+
+    /**
+     * Open the appointment in the side panel with the picker for a new time.
+     */
+    public function startRescheduling(int $appointmentId): void
+    {
+        $this->viewAppointment($appointmentId);
+        $appointment = $this->openAppointment;
+
+        if (! $appointment->status->isActive() || $appointment->hasStarted()) {
+            return;
+        }
+
+        $currentDate = $appointment->localStartsAt()->toDateString();
+        $this->rescheduling = true;
+        $this->rescheduleDate = ! empty($this->rescheduleAvailability[$currentDate])
+            ? $currentDate
+            : collect($this->rescheduleAvailability)->filter()->keys()->first();
+    }
+
+    public function stopRescheduling(): void
+    {
+        $this->reset('rescheduling', 'rescheduleDate', 'rescheduleStartsAt');
+        $this->resetErrorBag('rescheduleSlot');
+        unset($this->rescheduleAvailability);
+    }
+
+    public function selectRescheduleDate(string $date): void
+    {
+        if (array_key_exists($date, $this->rescheduleAvailability)) {
+            $this->rescheduleDate = $date;
+            $this->rescheduleStartsAt = null;
+        }
+    }
+
+    public function selectRescheduleSlot(string $slot): void
+    {
+        $this->rescheduleStartsAt = collect($this->rescheduleAvailability[$this->rescheduleDate] ?? [])
+            ->contains(fn (CarbonImmutable $start) => $start->toIso8601String() === $slot) ? $slot : null;
+        $this->resetErrorBag('rescheduleSlot');
+    }
+
+    public function reschedule(AppointmentBooker $booker): void
+    {
+        if ($this->openAppointmentId === null || $this->rescheduleStartsAt === null) {
+            return;
+        }
+
+        $appointment = $this->findAppointment($this->openAppointmentId);
+
+        try {
+            $booker->reschedule($appointment, CarbonImmutable::parse($this->rescheduleStartsAt), CancelledBy::Business);
+        } catch (SlotUnavailableException $exception) {
+            $this->rescheduleStartsAt = null;
+            unset($this->rescheduleAvailability);
+            $this->addError('rescheduleSlot', $exception->getMessage());
+
+            return;
+        }
+
+        $this->stopRescheduling();
+        $this->showDate($appointment->localStartsAt());
+        $this->notify('Cita reprogramada. Le avisamos al cliente por correo.');
     }
 
     public function confirm(int $appointmentId, AppointmentBooker $booker): void
@@ -175,6 +250,19 @@ class Agenda extends Component
     }
 
     /**
+     * Free times the open appointment could move to, keyed by date.
+     *
+     * @return array<string, list<CarbonImmutable>>
+     */
+    #[Computed]
+    public function rescheduleAvailability(): array
+    {
+        $appointment = $this->openAppointment;
+
+        return $appointment ? app(AvailabilityService::class)->slotsToReschedule($appointment) : [];
+    }
+
+    /**
      * Hour range shown on the weekly grid, from the opening hours and appointments.
      *
      * @return array{start: int, end: int}
@@ -233,7 +321,7 @@ class Agenda extends Component
     private function showDate(CarbonImmutable $date): void
     {
         $this->date = $date->toDateString();
-        unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->gridHours, $this->stats);
+        unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->gridHours, $this->stats, $this->openAppointment);
     }
 
     private function markPast(int $appointmentId, AppointmentStatus $status): void

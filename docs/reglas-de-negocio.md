@@ -29,11 +29,18 @@ stateDiagram-v2
 |--------|--------------------|--------------------|-------------------|
 | Reservar | Sí | Sí (sus datos se llenan solos) | Desde la página pública |
 | Ver su cita | Con el enlace del correo | En "Mis citas" y con el enlace | En la agenda |
+| Cambiar el horario | Hasta N horas antes | Hasta N horas antes | Siempre que no haya empezado |
 | Cancelar | Hasta N horas antes | Hasta N horas antes | Siempre que no haya empezado |
 | Confirmar | No | No | Sí |
 | Marcar atendida / no asistió | No | No | Sí, cuando ya empezó |
 
 N es el "aviso para cancelar" que define cada negocio (2 horas en la demo).
+
+Al cambiar el horario de una cita:
+
+- Solo se ofrecen horas libres que cumplen las mismas reglas que una reserva nueva (horario, días cerrados, anticipación mínima y ventana de reserva). El horario que la cita ocupa ahora cuenta como libre, así que se puede mover unos minutos.
+- La cita conserva su código, su precio y su estado: si estaba "por confirmar", lo sigue estando.
+- Si ya se había enviado el recordatorio, se vuelve a enviar para el nuevo horario.
 
 ## Ajustes de cada negocio
 
@@ -55,6 +62,9 @@ N es el "aviso para cancelar" que define cada negocio (2 horas en la demo).
 | El negocio confirma | Cliente | Aviso de confirmación. |
 | El negocio cancela | Cliente | Aviso y enlace para reservar de nuevo. |
 | El cliente cancela | Dueño | Aviso de que se liberó el horario. |
+| El negocio cambia el horario | Cliente | Horario anterior y nuevo, con el enlace para cambiarlo otra vez o cancelar. |
+| El cliente cambia el horario | Dueño | Horario anterior y nuevo, con enlace a la agenda en ese día. |
+| Alguien pide recuperar su contraseña | Esa persona | Enlace para elegir una contraseña nueva, válido 60 minutos. |
 | 24 h antes (citas confirmadas) | Cliente | Recordatorio con dirección y enlace. No se envía a quien reservó hace menos de 2 horas. |
 
 Los correos se mandan por la cola, así que reservar no espera al servidor de correo. En la demo se escriben en el log (`MAIL_MAILER=log`).

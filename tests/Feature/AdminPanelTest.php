@@ -14,6 +14,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentConfirmed;
+use App\Notifications\AppointmentRescheduled;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -112,6 +113,52 @@ class AdminPanelTest extends TestCase
             ->call('filterByStatus', 'no-existe')
             ->assertSet('statusFilter', '')
             ->assertSee('Bruno Díaz');
+    }
+
+    #[Test]
+    public function the_owner_reschedules_an_appointment_from_the_side_panel(): void
+    {
+        $service = Service::factory()->for($this->business)->minutes(60)->create();
+        $appointment = Appointment::factory()->for($service)->for($this->business)
+            ->at(CarbonImmutable::parse('2026-10-13 10:00', 'America/Mexico_City')->utc())
+            ->create(['customer_name' => 'Ana López']);
+
+        Livewire::actingAs($this->owner)
+            ->test(Agenda::class)
+            ->call('startRescheduling', $appointment->id)
+            ->assertSet('openAppointmentId', $appointment->id)
+            ->assertSet('rescheduling', true)
+            ->assertSet('rescheduleDate', '2026-10-13')
+            ->assertSee('Reprogramar cita')
+            ->call('selectRescheduleDate', '2026-10-14')
+            ->call('selectRescheduleSlot', '2026-10-14T15:00:00-06:00')
+            ->call('reschedule')
+            ->assertSet('rescheduling', false)
+            ->assertSet('date', '2026-10-14')
+            ->assertDispatched('toast', message: 'Cita reprogramada. Le avisamos al cliente por correo.');
+
+        $this->assertSame('2026-10-14 21:00:00', $appointment->fresh()->getRawOriginal('starts_at'));
+        Notification::assertSentOnDemand(AppointmentRescheduled::class);
+    }
+
+    #[Test]
+    public function an_appointment_cannot_be_moved_onto_a_taken_time_from_the_panel(): void
+    {
+        $service = Service::factory()->for($this->business)->minutes(60)->create();
+        $appointment = Appointment::factory()->for($service)->for($this->business)
+            ->at(CarbonImmutable::parse('2026-10-13 10:00', 'America/Mexico_City')->utc())->create();
+
+        $component = Livewire::actingAs($this->owner)
+            ->test(Agenda::class)
+            ->call('startRescheduling', $appointment->id)
+            ->call('selectRescheduleSlot', '2026-10-13T12:00:00-06:00')
+            ->assertSet('rescheduleStartsAt', '2026-10-13T12:00:00-06:00');
+
+        Appointment::factory()->for($service)->for($this->business)
+            ->at(CarbonImmutable::parse('2026-10-13 12:00', 'America/Mexico_City')->utc())->create();
+
+        $component->call('reschedule')->assertHasErrors('rescheduleSlot')->assertSet('rescheduling', true);
+        $this->assertSame('2026-10-13 16:00:00', $appointment->fresh()->getRawOriginal('starts_at'));
     }
 
     #[Test]

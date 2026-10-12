@@ -12,13 +12,14 @@ use App\Models\User;
 use App\Notifications\AppointmentBooked;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentConfirmed;
+use App\Notifications\AppointmentRescheduled;
 use App\Notifications\NewAppointmentForBusiness;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 /**
- * Creates, confirms and cancels appointments, and sends the matching emails.
+ * Creates, confirms, moves and cancels appointments, and sends the matching emails.
  */
 class AppointmentBooker
 {
@@ -85,6 +86,47 @@ class AppointmentBooker
 
         Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
             ->notify(new AppointmentConfirmed($appointment));
+    }
+
+    /**
+     * Move an active appointment to another free time and tell the other side.
+     *
+     * Uses the same lock as book(), and the appointment's own time counts as
+     * free, so it can also move a few minutes within its current slot. The
+     * status stays the same, and the reminder is sent again for the new time.
+     *
+     * @throws SlotUnavailableException
+     */
+    public function reschedule(Appointment $appointment, CarbonImmutable $startsAt, CancelledBy $changedBy): Appointment
+    {
+        $previousWhen = $appointment->whenLabel();
+
+        DB::transaction(function () use ($appointment, $startsAt) {
+            $business = Business::whereKey($appointment->business_id)->lockForUpdate()->firstOrFail();
+            $appointment->refresh()->setRelation('business', $business);
+            $service = $appointment->service->setRelation('business', $business);
+
+            if (! $appointment->status->isActive() || ! $this->availability->isAvailable($service, $startsAt, $appointment)) {
+                throw new SlotUnavailableException;
+            }
+
+            $appointment->update([
+                'starts_at' => $startsAt->utc(),
+                'ends_at' => $startsAt->addMinutes($service->duration_minutes)->utc(),
+                'reminder_sent_at' => null,
+            ]);
+        });
+
+        $appointment->load('business.owner', 'service');
+        $notification = new AppointmentRescheduled($appointment, $previousWhen);
+
+        if ($changedBy === CancelledBy::Business) {
+            Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])->notify($notification);
+        } else {
+            $appointment->business->owner->notify($notification);
+        }
+
+        return $appointment;
     }
 
     /**

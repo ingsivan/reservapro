@@ -11,16 +11,14 @@ Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué re
 - [x] Rediseño de la interfaz: asistente paso a paso, panel lateral de citas, filtros, toasts y ventana de confirmación ([interfaz](interfaz.md))
 - [x] Agregar la cita a Google Calendar o descargarla como `.ics`
 - [x] Aviso de abierto o cerrado y horario resumido en la página del negocio
+- [x] Recuperar contraseña por correo
+- [x] Reprogramar una cita desde el enlace del cliente y desde el panel de la cita en la agenda
 
 ## Prioridad alta
 
 Funciones que un negocio real pediría el primer día.
 
-- [ ] **Recuperar contraseña.** Hoy no hay forma de restablecerla. Agregar las rutas de `Password::sendResetLink()` y `Password::reset()` con sus vistas, siguiendo `LoginController`.
-- [ ] **Reprogramar una cita.** Hoy hay que cancelar y volver a reservar.
-  - Agregar `AppointmentBooker::reschedule()`, con el mismo bloqueo y la misma verificación que `book()`.
-  - Usarlo desde el enlace del cliente y desde el panel de la cita en la agenda.
-- [ ] **Crear citas desde el panel**, para reservas por teléfono o clientes que llegan sin cita. Reutilizar `AvailabilityService` y `AppointmentBooker::book()` desde la agenda: clic en un hueco libre del calendario → formulario corto.
+- [ ] **Crear citas desde el panel**, para reservas por teléfono o clientes que llegan sin cita. Reutilizar `AvailabilityService`, `AppointmentBooker::book()` y el componente `x-time-picker` desde la agenda: clic en un hueco libre del calendario → formulario corto.
 - [ ] **Correos con la marca del negocio.** Los correos usan la plantilla estándar de Laravel. Publicarla (`php artisan vendor:publish --tag=laravel-mail`) y darle los colores y el logo de ReservaPro.
 
 ## Prioridad media
@@ -35,7 +33,7 @@ Funciones que hacen crecer el producto.
 - [ ] **Pagos en línea o anticipo al reservar** (Stripe o Mercado Pago). La cita quedaría "por confirmar" hasta recibir el pago.
 - [ ] **Recordatorios por WhatsApp o SMS.** Agregar un canal más a `AppointmentReminder`, que hoy solo envía correo, para que el cliente elija cómo recibirlos.
 - [ ] **Reportes.** Exportar las citas a CSV e ingresos por mes y por servicio en una pantalla nueva del panel.
-- [ ] **Mover citas arrastrándolas en la agenda.** Requiere la reprogramación de arriba.
+- [ ] **Mover citas arrastrándolas en la agenda.** `AppointmentBooker::reschedule()` ya hace el trabajo; falta el arrastre en el calendario.
 
 ## Prioridad baja
 

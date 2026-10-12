@@ -51,11 +51,20 @@
                 </div>
             @endif
 
+            @if ($appointment->canBeRescheduledByCustomer())
+                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-6 py-4">
+                    <p class="text-sm text-slate-600">¿No puedes a esa hora?</p>
+                    <a href="{{ $appointment->rescheduleUrl() }}" class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500">
+                        <x-icon name="clock" class="size-4" /> Cambiar horario
+                    </a>
+                </div>
+            @endif
+
             @if ($appointment->canBeCancelledByCustomer())
                 <form method="POST" action="{{ $cancelUrl }}" x-data x-ref="cancelForm" class="border-t border-slate-100 bg-slate-50 px-6 py-4">
                     @csrf
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <p class="text-xs text-slate-500">Puedes cancelar hasta {{ $business->cancellation_notice_hours }} horas antes.</p>
+                        <p class="text-xs text-slate-500">Puedes cambiarla o cancelarla hasta {{ $business->cancellation_notice_hours }} horas antes.</p>
                         <button type="button"
                                 x-on:click="$dispatch('confirm-action', {
                                     title: '¿Cancelar tu cita?',
@@ -68,7 +77,7 @@
                 </form>
             @elseif ($appointment->status->isActive())
                 <p class="border-t border-slate-100 bg-slate-50 px-6 py-4 text-sm text-slate-600">
-                    Ya pasó el plazo para cancelar en línea.
+                    Ya pasó el plazo para cambiar o cancelar en línea.
                     @if ($business->phone)
                         Llama al {{ $business->phone }} si necesitas cambiarla.
                     @endif

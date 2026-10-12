@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Notifications\AppointmentBooked;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentConfirmed;
+use App\Notifications\AppointmentRescheduled;
 use App\Notifications\NewAppointmentForBusiness;
 use App\Services\AppointmentBooker;
 use Carbon\CarbonImmutable;
@@ -158,6 +159,73 @@ class AppointmentBookerTest extends TestCase
 
         $this->assertStringContainsString('martes 13 de octubre de 2026, 10:00 a 11:00', implode("\n", $mail->introLines));
         $this->assertStringContainsString('signature=', $mail->actionUrl);
+    }
+
+    #[Test]
+    public function an_appointment_moves_to_a_free_time_and_the_customer_hears_about_it(): void
+    {
+        $appointment = $this->book();
+        $appointment->update(['reminder_sent_at' => now()]);
+
+        app(AppointmentBooker::class)->reschedule($appointment, $this->tomorrowAtTen->addHours(2), CancelledBy::Business);
+
+        $appointment->refresh();
+        $this->assertSame('2026-10-13 18:00:00', $appointment->getRawOriginal('starts_at'));
+        $this->assertSame('2026-10-13 19:00:00', $appointment->getRawOriginal('ends_at'));
+        $this->assertSame(AppointmentStatus::Confirmed, $appointment->status);
+        $this->assertNull($appointment->reminder_sent_at);
+        Notification::assertSentOnDemand(AppointmentRescheduled::class, function (AppointmentRescheduled $notification) {
+            $lines = implode("\n", $notification->toMail(new AnonymousNotifiable)->introLines);
+
+            return str_contains($lines, '**Antes:** martes 13 de octubre de 2026, 10:00 a 11:00')
+                && str_contains($lines, '**Ahora:** martes 13 de octubre de 2026, 12:00 a 13:00');
+        });
+        Notification::assertNotSentTo($this->service->business->owner, AppointmentRescheduled::class);
+    }
+
+    #[Test]
+    public function a_customer_reschedule_emails_the_business(): void
+    {
+        app(AppointmentBooker::class)->reschedule($this->book(), $this->tomorrowAtTen->addDay(), CancelledBy::Customer);
+
+        Notification::assertSentTo($this->service->business->owner, AppointmentRescheduled::class);
+    }
+
+    #[Test]
+    public function an_appointment_can_move_into_part_of_its_own_time(): void
+    {
+        $appointment = $this->book();
+
+        app(AppointmentBooker::class)->reschedule($appointment, $this->tomorrowAtTen->addMinutes(30), CancelledBy::Business);
+
+        $this->assertSame('2026-10-13 16:30:00', $appointment->fresh()->getRawOriginal('starts_at'));
+    }
+
+    #[Test]
+    public function an_appointment_cannot_move_onto_another_one(): void
+    {
+        $this->book('otra@example.com', $this->tomorrowAtTen->addHour());
+        $appointment = $this->book();
+
+        try {
+            app(AppointmentBooker::class)->reschedule($appointment, $this->tomorrowAtTen->addMinutes(30), CancelledBy::Customer);
+            $this->fail('The appointment moved onto a taken time.');
+        } catch (SlotUnavailableException) {
+            $this->assertSame('2026-10-13 16:00:00', $appointment->fresh()->getRawOriginal('starts_at'));
+        }
+
+        Notification::assertNotSentTo($this->service->business->owner, AppointmentRescheduled::class);
+    }
+
+    #[Test]
+    public function a_cancelled_appointment_cannot_be_rescheduled(): void
+    {
+        $appointment = $this->book();
+        app(AppointmentBooker::class)->cancel($appointment, CancelledBy::Customer);
+
+        $this->expectException(SlotUnavailableException::class);
+
+        app(AppointmentBooker::class)->reschedule($appointment, $this->tomorrowAtTen->addHours(2), CancelledBy::Customer);
     }
 
     private function book(string $email = 'ana@example.com', ?CarbonImmutable $startsAt = null): Appointment

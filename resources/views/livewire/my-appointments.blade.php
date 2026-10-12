@@ -20,14 +20,17 @@
                     </div>
                 </div>
                 @if ($appointment->canBeCancelledByCustomer())
-                    <button type="button"
-                            x-on:click="$dispatch('confirm-action', {
-                                title: '¿Cancelar esta cita?',
-                                message: 'Liberaremos el horario y le avisaremos al negocio.',
-                                confirmLabel: 'Sí, cancelar',
-                                action: () => $wire.cancel({{ $appointment->id }}),
-                            })"
-                            class="self-start rounded-lg border border-rose-300 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-50 sm:self-auto">Cancelar</button>
+                    <div class="flex gap-2 self-start sm:self-auto">
+                        <a href="{{ $appointment->rescheduleUrl() }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Cambiar horario</a>
+                        <button type="button"
+                                x-on:click="$dispatch('confirm-action', {
+                                    title: '¿Cancelar esta cita?',
+                                    message: 'Liberaremos el horario y le avisaremos al negocio.',
+                                    confirmLabel: 'Sí, cancelar',
+                                    action: () => $wire.cancel({{ $appointment->id }}),
+                                })"
+                                class="rounded-lg border border-rose-300 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-50">Cancelar</button>
+                    </div>
                 @endif
             </div>
         @empty

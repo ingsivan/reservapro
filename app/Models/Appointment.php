@@ -125,11 +125,27 @@ class Appointment extends Model
     }
 
     /**
+     * Customers may move an appointment within the same notice period as cancelling it.
+     */
+    public function canBeRescheduledByCustomer(): bool
+    {
+        return $this->canBeCancelledByCustomer();
+    }
+
+    /**
      * Signed link that lets the customer manage the appointment without an account.
      */
     public function manageUrl(): string
     {
         return URL::signedRoute('appointments.manage', ['appointment' => $this->code]);
+    }
+
+    /**
+     * Signed link to the page where the customer picks a new time.
+     */
+    public function rescheduleUrl(): string
+    {
+        return URL::signedRoute('appointments.reschedule', ['appointment' => $this->code]);
     }
 
     /**

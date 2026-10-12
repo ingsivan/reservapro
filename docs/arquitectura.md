@@ -90,15 +90,17 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 
 | Clase | Responsabilidad |
 |-------|-----------------|
-| `App\Services\AvailabilityService` | Horarios libres por día, días con disponibilidad y verificación de un inicio concreto. |
-| `App\Services\AppointmentBooker` | Reservar, confirmar y cancelar, con los correos correspondientes. |
+| `App\Services\AvailabilityService` | Horarios libres por día, días con disponibilidad, verificación de un inicio concreto y horas a las que se puede mover una cita. |
+| `App\Services\AppointmentBooker` | Reservar, confirmar, reprogramar y cancelar, con los correos correspondientes. `reschedule()` usa el mismo bloqueo que `book()`. |
 | `App\Services\BusinessSetup` | Crea un negocio nuevo con `slug` único y un horario de ejemplo. |
 | `App\Livewire\BookingWizard` | Página pública de reserva en tres pasos. |
 | `App\Livewire\Admin\Agenda` | Calendario semanal, lista del día, estadísticas y acciones sobre las citas. |
 | `App\Livewire\Admin\Services`, `ScheduleManager`, `BusinessSettings` | Catálogo, horario semanal y días cerrados, y ajustes del negocio. |
 | `App\Livewire\MyAppointments` | Citas del cliente con cuenta. |
+| `App\Livewire\RescheduleAppointment` | Cambiar el horario desde el enlace firmado del correo. |
+| `App\Http\Controllers\Auth\ForgotPasswordController`, `ResetPasswordController` | Recuperar la contraseña con el broker de Laravel. |
 | `App\Http\Controllers\ManageAppointmentController` | Ver y cancelar una cita desde el enlace firmado del correo, y descargarla como `.ics`. |
-| `resources/views/components` | Piezas de interfaz compartidas: iconos (`x-icon`), avisos tipo toast (`x-toaster`), ventana de confirmación (`x-confirm-dialog`) y acciones de una cita en el panel. |
+| `resources/views/components` | Piezas de interfaz compartidas: iconos (`x-icon`), avisos tipo toast (`x-toaster`), ventana de confirmación (`x-confirm-dialog`), selector de día y hora (`x-time-picker`) y acciones de una cita en el panel. |
 | `App\Console\Commands\SendAppointmentReminders` | Recordatorio por correo 24 horas antes (cada 15 minutos con el Scheduler). |
 
 ## Pruebas
