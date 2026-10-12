@@ -59,6 +59,13 @@ N es el "aviso para cancelar" que define cada negocio (2 horas en la demo).
 
 Los correos se mandan por la cola, así que reservar no espera al servidor de correo. En la demo se escriben en el log (`MAIL_MAILER=log`).
 
+## Página pública
+
+- El aviso de la portada dice "Abierto · cierra a las HH:MM" si la hora actual del negocio cae dentro de una ventana de horario (también la de un turno de ayer que cruzó la medianoche). Si no, dice cuándo vuelve a abrir: hoy, mañana o el día de la semana, saltando los días bloqueados. Si no abre en la próxima semana, solo dice "Cerrado".
+- El horario agrupa los días seguidos con las mismas horas ("Lun – Vie").
+- En el selector de días, un día sin horarios libres dice "Cerrado" si el negocio no abre ese día de la semana, o "Sin lugar" si ya se llenó o está bloqueado.
+- Los botones de calendario usan las horas en UTC, así que el evento aparece a la hora correcta en cualquier zona horaria. El archivo `.ics` va firmado como el resto de los enlaces de la cita.
+
 ## Servicios y horario
 
 - Un servicio con citas registradas no se borra: se oculta, para no romper el historial.
