@@ -29,7 +29,8 @@ COPY --from=assets /app/public/build ./public/build
 COPY docker/start.sh /usr/local/bin/start
 
 RUN chmod +x /usr/local/bin/start \
-    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && ln -sfn ../storage/app/public public/storage \
     && chown -R www-data:www-data storage bootstrap/cache database
 
 USER www-data

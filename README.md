@@ -26,6 +26,7 @@
 - **Citas por teléfono o sin cita:** desde la agenda, el negocio agenda una cita confirmada al momento; el correo del cliente es opcional.
 - **Confirmación manual opcional:** las citas pueden quedar "por confirmar" hasta que el negocio las apruebe.
 - **Panel del administrador:** menú lateral, agenda semanal tipo calendario con línea de la hora actual, filtros por estado y un panel lateral con el detalle de cada cita; estadísticas de la semana, servicios con interruptor de visible/oculto, horario semanal, días bloqueados y ajustes.
+- **Logo y portada:** cada negocio sube su logo y una foto de portada desde Ajustes; sin ellos, la página usa sus iniciales y un degradado.
 - **Interfaz cuidada:** avisos tipo toast, ventana propia para confirmar acciones que no se pueden deshacer, estados de carga y diseño adaptado al celular.
 - **Cuentas de cliente:** quien se registra ve sus citas en "Mis citas", puede cambiarlas o cancelarlas y recuperar su contraseña por correo.
 - **Negocio demo** con dos semanas de citas alrededor de la fecha actual.
@@ -54,7 +55,7 @@
 | Frontend | Livewire 4 (con Alpine), Blade, Tailwind CSS 4, Vite |
 | Base de datos | SQLite en local y en la demo; MySQL o PostgreSQL en producción |
 | Trabajo en segundo plano | Colas (correos) y Scheduler (recordatorios) de Laravel |
-| Pruebas | PHPUnit (116 tests), Pint |
+| Pruebas | PHPUnit (119 tests), Pint |
 | CI/CD | GitHub Actions, Docker, Render |
 
 La única dependencia además de Laravel es Livewire. El calendario de la agenda está hecho con Tailwind, sin librerías de JavaScript.
@@ -86,7 +87,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 116 tests
+php artisan test        # 119 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
@@ -117,6 +118,7 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Reprogramar citas, desde el enlace del cliente y desde la agenda
 - [x] Crear citas desde el panel, para llamadas y clientes sin cita
 - [x] Correos con la marca de ReservaPro, todo en español
+- [x] Logo y foto de portada de cada negocio
 - [ ] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp

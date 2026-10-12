@@ -26,4 +26,5 @@ El código público de la cita (8 caracteres) no es el id de la base de datos y 
 - Recuperar contraseña usa el broker de Laravel: el token se guarda cifrado, vence en 60 minutos y solo se puede pedir uno por minuto. La respuesta es la misma exista o no la cuenta, para no revelar quién está registrado.
 - Protección CSRF de Laravel en todos los formularios y en las peticiones de Livewire.
 - Todo el contenido que escriben los usuarios se muestra escapado con `{{ }}`.
+- El logo y la portada solo aceptan JPG, PNG o WebP (no SVG, que puede llevar scripts), con tamaño máximo de 2 y 5 MB. Se guardan con un nombre aleatorio en `storage/app/public/businesses/{id}` y la imagen anterior se borra al reemplazarla.
 - Detrás de Render se usa `TRUSTED_PROXIES=*` para que los enlaces firmados usen HTTPS y los límites por IP vean la IP real.

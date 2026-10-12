@@ -47,7 +47,7 @@ Cada push a `main` despliega de nuevo automáticamente.
 Limitaciones del plan gratuito:
 
 - El servicio se duerme tras unos 15 minutos sin visitas; la siguiente visita tarda unos 50 segundos en despertarlo.
-- El disco no es persistente: al dormir o al desplegar, la base SQLite vuelve a los datos de demostración, con citas alrededor de la fecha de ese momento. Para una demo pública eso es una ventaja.
+- El disco no es persistente: al dormir o al desplegar, la base SQLite vuelve a los datos de demostración, con citas alrededor de la fecha de ese momento, y los logos y portadas que se hayan subido se borran (el negocio demo vuelve a tener los suyos). Para una demo pública eso es una ventaja. En producción, guarda las imágenes en S3 o similar con `FILESYSTEM_DISK`.
 - Mientras duerme, no se envían recordatorios.
 
 ## Base de datos persistente

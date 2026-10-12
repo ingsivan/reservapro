@@ -26,7 +26,7 @@
     {{-- Sidebar (desktop) --}}
     <aside class="hidden border-r border-slate-200 bg-white lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <a href="{{ route('admin.agenda') }}" wire:navigate class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-            <x-logo class="size-9 shrink-0" />
+            <x-business-avatar :business="$business" class="size-9 shrink-0 rounded-lg text-sm" />
             <span class="min-w-0">
                 <span class="block truncate font-semibold text-slate-900">{{ $business->name }}</span>
                 <span class="block text-xs text-slate-500">Panel de tu negocio</span>
@@ -82,7 +82,7 @@
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md lg:hidden">
         <div class="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <a href="{{ route('admin.agenda') }}" wire:navigate class="flex min-w-0 items-center gap-2 font-semibold text-slate-900">
-                <x-logo class="size-8 shrink-0" />
+                <x-business-avatar :business="$business" class="size-8 shrink-0 rounded-lg text-xs" />
                 <span class="truncate">{{ $business->name }}</span>
             </a>
             <div class="flex shrink-0 items-center gap-1 text-sm">

@@ -22,6 +22,50 @@
         </div>
     </section>
 
+    {{-- Logo and cover: each upload is saved right away --}}
+    <section class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="relative">
+            @if ($coverUrl = $this->business->coverUrl())
+                <img src="{{ $coverUrl }}" alt="Foto de portada actual" class="h-32 w-full object-cover sm:h-40">
+            @else
+                <div class="relative h-32 bg-linear-to-br from-teal-700 via-teal-500 to-emerald-400 sm:h-40">
+                    <div class="bg-dots absolute inset-0"></div>
+                </div>
+            @endif
+            <div class="absolute right-3 bottom-3 flex gap-2">
+                <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur hover:bg-white">
+                    <x-icon name="pencil" class="size-4" />
+                    <span wire:loading.remove wire:target="cover">{{ $coverUrl ? 'Cambiar portada' : 'Subir portada' }}</span>
+                    <span wire:loading wire:target="cover">Subiendo…</span>
+                    <input type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp" class="sr-only">
+                </label>
+                @if ($coverUrl)
+                    <button type="button" wire:click="removeCover" class="rounded-lg bg-white/90 px-2 py-1.5 text-slate-600 shadow-sm backdrop-blur hover:bg-white hover:text-rose-700" aria-label="Quitar foto de portada" title="Quitar foto de portada">
+                        <x-icon name="trash" class="size-4" />
+                    </button>
+                @endif
+            </div>
+        </div>
+        <div class="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:items-end sm:px-6">
+            <x-business-avatar :business="$this->business" class="relative -mt-10 size-20 shrink-0 rounded-2xl border-4 border-white text-2xl shadow-md" />
+            <div class="min-w-0 flex-1">
+                <h2 class="font-semibold text-slate-900">Imagen de tu página</h2>
+                <p class="text-sm text-slate-500">Logo cuadrado de al menos 96 px y portada horizontal de al menos 800 × 200 px. JPG, PNG o WebP.</p>
+                @error('logo') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                @error('cover') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+            </div>
+            <div class="flex shrink-0 gap-2">
+                <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    <span wire:loading.remove wire:target="logo">{{ $this->business->logoUrl() ? 'Cambiar logo' : 'Subir logo' }}</span>
+                    <span wire:loading wire:target="logo">Subiendo…</span>
+                    <input type="file" wire:model="logo" accept="image/jpeg,image/png,image/webp" class="sr-only">
+                </label>
+                @if ($this->business->logoUrl())
+                    <button type="button" wire:click="removeLogo" class="rounded-lg px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-50">Quitar</button>
+                @endif
+            </div>
+        </div>
+    </section>
 
     <form wire:submit="save" class="mt-6 space-y-6">
         <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
