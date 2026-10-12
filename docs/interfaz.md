@@ -34,7 +34,8 @@ Están en `resources/views/components`.
 | `x-confirm-dialog` | Ventana de confirmación (un `<dialog>` nativo). Ya está en los dos layouts. | Ver abajo |
 | `x-field` | Etiqueta, campo y error de validación. Acepta `type="textarea"`. | `<x-field name="email" type="email" label="Correo" wire:model="email" />` |
 | `x-status-badge` | Etiqueta de color con el estado de una cita. | `<x-status-badge :status="$appointment->status" />` |
-| `x-admin.appointment-actions` | Botones según el estado de la cita: confirmar, cancelar, atendida o no asistió. | `<x-admin.appointment-actions :appointment="$appointment" />` |
+| `x-time-picker` | Fila de días con sus horarios libres y las horas del día elegido, agrupadas en mañana, tarde y noche. Llama a los métodos de Livewire `select-date` y `select-slot`. Se usa en la reserva, al cambiar el horario y en el panel de la cita. | `<x-time-picker :business="$business" :availability="$this->availability" :date="$date" :selected="$startsAt" />` |
+| `x-admin.appointment-actions` | Botones según el estado de la cita: confirmar, reprogramar, cancelar, atendida o no asistió. | `<x-admin.appointment-actions :appointment="$appointment" />` |
 | `x-logo` | Logo de ReservaPro. | — |
 
 Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
@@ -99,6 +100,7 @@ stateDiagram-v2
   - Calendario semanal con una línea roja en la hora actual.
   - Lista de citas del día seleccionado.
   - Al hacer clic en una cita se abre un panel lateral con sus datos y acciones; se cierra con Esc o al hacer clic fuera.
+  - **Reprogramar** cambia el contenido del panel por el selector de día y hora, sin salir de la agenda.
   - El filtro queda en la URL (`?estado=pending`).
 - **Servicios:** tarjetas con un interruptor Visible / Oculto; el formulario se abre en una ventana.
 - **Horario:** ventanas por día con una barra que las dibuja sobre las 24 horas.
@@ -106,9 +108,10 @@ stateDiagram-v2
 
 ### Cliente
 
-- **Tu cita** (enlace del correo): datos, botones de calendario, llamar al negocio y cancelar con confirmación.
+- **Tu cita** (enlace del correo): datos, botones de calendario, llamar al negocio, cambiar horario y cancelar con confirmación.
+- **Cambiar horario:** el mismo selector de día y hora de la reserva, con el horario actual arriba y una barra fija con el nuevo horario y el botón para guardar.
 - **Mis citas:** próximas con su fecha destacada y anteriores en una lista compacta.
-- **Entrar:** muestra las cuentas de prueba; al pulsar una, se llenan los campos.
+- **Entrar:** muestra las cuentas de prueba; al pulsar una, se llenan los campos. Enlaza a **Recuperar contraseña**.
 
 ## Accesibilidad
 

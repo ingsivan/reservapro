@@ -21,11 +21,12 @@
 - **Horarios flexibles:** varios turnos por día, turnos que cruzan la medianoche, días cerrados, intervalo entre horarios, anticipación mínima y días máximos hacia adelante.
 - **Zonas horarias reales:** cada negocio tiene la suya; las citas se guardan en UTC y respetan el horario de verano.
 - **Correos automáticos:** confirmación al cliente, aviso al negocio, recordatorio 24 horas antes y avisos de cancelación, enviados por la cola.
-- **Cancelación con enlace firmado:** el cliente cancela desde el correo, sin cuenta, dentro del plazo que defina el negocio.
+- **Cambiar o cancelar con enlace firmado:** desde el correo y sin cuenta, el cliente elige otro horario o cancela, dentro del plazo que defina el negocio.
+- **Reprogramar desde la agenda:** el negocio mueve una cita a otro horario libre y el cliente recibe un correo con el antes y el después.
 - **Confirmación manual opcional:** las citas pueden quedar "por confirmar" hasta que el negocio las apruebe.
 - **Panel del administrador:** menú lateral, agenda semanal tipo calendario con línea de la hora actual, filtros por estado y un panel lateral con el detalle de cada cita; estadísticas de la semana, servicios con interruptor de visible/oculto, horario semanal, días bloqueados y ajustes.
 - **Interfaz cuidada:** avisos tipo toast, ventana propia para confirmar acciones que no se pueden deshacer, estados de carga y diseño adaptado al celular.
-- **Cuentas de cliente:** quien se registra ve sus citas en "Mis citas" y puede cancelarlas.
+- **Cuentas de cliente:** quien se registra ve sus citas en "Mis citas", puede cambiarlas o cancelarlas y recuperar su contraseña por correo.
 - **Negocio demo** con dos semanas de citas alrededor de la fecha actual.
 
 | Reserva | Confirmación | En el celular |
@@ -36,9 +37,9 @@
 |--------|---------------------|-----------|
 | ![Inicio](docs/screenshots/home.png) | ![Panel lateral con el detalle de la cita](docs/screenshots/appointment.png) | ![Servicios](docs/screenshots/services.png) |
 
-| Horario | Ajustes |
-|---------|---------|
-| ![Horario y días cerrados](docs/screenshots/schedule.png) | ![Ajustes del negocio](docs/screenshots/settings.png) |
+| Horario | Ajustes | Cambiar horario |
+|---------|---------|-----------------|
+| ![Horario y días cerrados](docs/screenshots/schedule.png) | ![Ajustes del negocio](docs/screenshots/settings.png) | ![El cliente elige otro horario](docs/screenshots/reschedule.png) |
 
 ## Stack
 
@@ -48,7 +49,7 @@
 | Frontend | Livewire 4 (con Alpine), Blade, Tailwind CSS 4, Vite |
 | Base de datos | SQLite en local y en la demo; MySQL o PostgreSQL en producción |
 | Trabajo en segundo plano | Colas (correos) y Scheduler (recordatorios) de Laravel |
-| Pruebas | PHPUnit (90 tests), Pint |
+| Pruebas | PHPUnit (107 tests), Pint |
 | CI/CD | GitHub Actions, Docker, Render |
 
 La única dependencia además de Laravel es Livewire. El calendario de la agenda está hecho con Tailwind, sin librerías de JavaScript.
@@ -80,7 +81,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 90 tests
+php artisan test        # 107 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
@@ -107,8 +108,9 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Publicar la demo
 - [x] Rediseño de la interfaz: asistente paso a paso, panel lateral de citas, filtros, toasts y confirmaciones
 - [x] Agregar la cita a Google Calendar o como `.ics`
-- [ ] Recuperar contraseña
-- [ ] Reprogramar citas y crearlas desde el panel
+- [x] Recuperar contraseña
+- [x] Reprogramar citas, desde el enlace del cliente y desde la agenda
+- [ ] Crear citas desde el panel
 - [ ] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp

@@ -19,6 +19,9 @@
                     <x-icon name="check" class="size-4" /> Confirmar
                 </button>
             @endif
+            <button type="button" wire:click="startRescheduling({{ $appointment->id }})" class="{{ $base }} inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50">
+                <x-icon name="clock" class="size-4" /> Reprogramar
+            </button>
             <button type="button"
                     x-on:click="$dispatch('confirm-action', {
                         title: @js('¿Cancelar la cita de '.$appointment->customer_name.'?'),

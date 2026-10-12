@@ -9,7 +9,7 @@
 
 ## Enlaces firmados
 
-El cliente sin cuenta administra su cita con un enlace de `URL::signedRoute()`. La firma cubre la URL completa, así que no se puede cambiar el código para ver o cancelar la cita de otra persona; cualquier cambio da 403. El formulario de cancelar y la descarga del archivo `.ics` también van firmados.
+El cliente sin cuenta administra su cita con un enlace de `URL::signedRoute()`. La firma cubre la URL completa, así que no se puede cambiar el código para ver o cancelar la cita de otra persona; cualquier cambio da 403. El formulario de cancelar, la página para cambiar el horario y la descarga del archivo `.ics` también van firmados. En la página para cambiar el horario (un componente de Livewire), la cita queda en una propiedad `#[Locked]`, así que las acciones posteriores no pueden apuntar a otra cita aunque no lleven la firma.
 
 El código público de la cita (8 caracteres) no es el id de la base de datos y evita caracteres confusos (0/O, 1/I/L).
 
@@ -18,11 +18,12 @@ El código público de la cita (8 caracteres) no es el id de la base de datos y 
 - El servidor vuelve a calcular la disponibilidad antes de guardar. El navegador solo elige entre los horarios que el servidor ofreció, y aun así se verifica de nuevo dentro de la transacción.
 - Solo se pueden reservar servicios activos del negocio de la página.
 - Límite de 5 reservas por hora por IP (`RateLimiter`), para que nadie llene la agenda con reservas falsas.
-- Inicio de sesión, registro y el botón de demo tienen límite de 5 intentos por minuto.
+- Inicio de sesión, registro, recuperar contraseña y el botón de demo tienen límite de 5 intentos por minuto.
 
 ## Otros
 
 - Contraseñas con `bcrypt` y la regla `Password::defaults()`.
+- Recuperar contraseña usa el broker de Laravel: el token se guarda cifrado, vence en 60 minutos y solo se puede pedir uno por minuto. La respuesta es la misma exista o no la cuenta, para no revelar quién está registrado.
 - Protección CSRF de Laravel en todos los formularios y en las peticiones de Livewire.
 - Todo el contenido que escriben los usuarios se muestra escapado con `{{ }}`.
 - Detrás de Render se usa `TRUSTED_PROXIES=*` para que los enlaces firmados usen HTTPS y los límites por IP vean la IP real.

@@ -205,58 +205,95 @@
                     </button>
                 </header>
 
-                <dl class="flex-1 space-y-5 overflow-y-auto px-6 py-6 text-sm">
-                    <div class="flex gap-3">
-                        <x-icon name="calendar" class="mt-0.5 size-5 text-slate-400" />
-                        <div>
-                            <dt class="sr-only">Fecha</dt>
-                            <dd class="font-medium text-slate-900 first-letter:uppercase">{{ $appointment->localStartsAt()->translatedFormat('l j \d\e F') }}</dd>
-                            <dd class="text-slate-500 tabular-nums">{{ $appointment->localStartsAt()->format('H:i') }} – {{ $appointment->localEndsAt()->format('H:i') }}</dd>
-                        </div>
+                @if ($rescheduling)
+                    <div class="flex-1 overflow-y-auto px-6 py-6">
+                        <h3 class="font-semibold text-slate-900">Reprogramar cita</h3>
+                        <p class="text-sm text-slate-500">
+                            Ahora: <span class="first-letter:uppercase">{{ $appointment->localStartsAt()->translatedFormat('l j \d\e F, H:i') }}</span> · {{ $appointment->service->name }}
+                        </p>
+
+                        @error('rescheduleSlot')
+                            <p class="mt-4 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
+                                <x-icon name="alert" class="mt-0.5 size-4" /> {{ $message }}
+                            </p>
+                        @enderror
+
+                        @if (collect($this->rescheduleAvailability)->filter()->isEmpty())
+                            <p class="mt-5 rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">No hay otros horarios libres en tu ventana de reservas.</p>
+                        @else
+                            <x-time-picker :business="$this->business" :availability="$this->rescheduleAvailability" :date="$rescheduleDate" :selected="$rescheduleStartsAt"
+                                           select-date="selectRescheduleDate" select-slot="selectRescheduleSlot" class="mt-5" />
+                        @endif
                     </div>
-                    <div class="flex gap-3">
-                        <x-icon name="tag" class="mt-0.5 size-5 text-slate-400" />
-                        <div>
-                            <dt class="sr-only">Servicio</dt>
-                            <dd class="font-medium text-slate-900">{{ $appointment->service->name }}</dd>
-                            <dd class="text-slate-500">{{ $appointment->service->formattedDuration() }} · {{ $appointment->formattedPrice() }}</dd>
-                        </div>
-                    </div>
-                    <div class="flex gap-3">
-                        <x-icon name="mail" class="mt-0.5 size-5 text-slate-400" />
-                        <div class="min-w-0">
-                            <dt class="sr-only">Correo</dt>
-                            <dd><a href="mailto:{{ $appointment->customer_email }}" class="break-all font-medium text-teal-700 hover:underline">{{ $appointment->customer_email }}</a></dd>
-                        </div>
-                    </div>
-                    @if ($appointment->customer_phone)
+                @else
+                    <dl class="flex-1 space-y-5 overflow-y-auto px-6 py-6 text-sm">
                         <div class="flex gap-3">
-                            <x-icon name="phone" class="mt-0.5 size-5 text-slate-400" />
+                            <x-icon name="calendar" class="mt-0.5 size-5 text-slate-400" />
                             <div>
-                                <dt class="sr-only">Teléfono</dt>
-                                <dd><a href="tel:{{ preg_replace('/[^\d+]/', '', $appointment->customer_phone) }}" class="font-medium text-teal-700 hover:underline">{{ $appointment->customer_phone }}</a></dd>
+                                <dt class="sr-only">Fecha</dt>
+                                <dd class="font-medium text-slate-900 first-letter:uppercase">{{ $appointment->localStartsAt()->translatedFormat('l j \d\e F') }}</dd>
+                                <dd class="text-slate-500 tabular-nums">{{ $appointment->localStartsAt()->format('H:i') }} – {{ $appointment->localEndsAt()->format('H:i') }}</dd>
                             </div>
                         </div>
-                    @endif
-                    @if ($appointment->notes)
-                        <div class="rounded-lg bg-amber-50 p-3 text-amber-900 ring-1 ring-amber-600/10">
-                            <dt class="text-xs font-semibold tracking-wide uppercase">Nota del cliente</dt>
-                            <dd class="mt-1">{{ $appointment->notes }}</dd>
+                        <div class="flex gap-3">
+                            <x-icon name="tag" class="mt-0.5 size-5 text-slate-400" />
+                            <div>
+                                <dt class="sr-only">Servicio</dt>
+                                <dd class="font-medium text-slate-900">{{ $appointment->service->name }}</dd>
+                                <dd class="text-slate-500">{{ $appointment->service->formattedDuration() }} · {{ $appointment->formattedPrice() }}</dd>
+                            </div>
                         </div>
-                    @endif
-                    <div class="border-t border-slate-100 pt-5 text-xs text-slate-500">
-                        <dt class="sr-only">Historial</dt>
-                        <dd>Reservada el {{ $appointment->created_at->setTimezone($this->business->timezone)->translatedFormat('j \d\e F, H:i') }}</dd>
-                        @if ($appointment->confirmed_at)
-                            <dd>Confirmada el {{ $appointment->confirmed_at->setTimezone($this->business->timezone)->translatedFormat('j \d\e F, H:i') }}</dd>
+                        <div class="flex gap-3">
+                            <x-icon name="mail" class="mt-0.5 size-5 text-slate-400" />
+                            <div class="min-w-0">
+                                <dt class="sr-only">Correo</dt>
+                                <dd><a href="mailto:{{ $appointment->customer_email }}" class="break-all font-medium text-teal-700 hover:underline">{{ $appointment->customer_email }}</a></dd>
+                            </div>
+                        </div>
+                        @if ($appointment->customer_phone)
+                            <div class="flex gap-3">
+                                <x-icon name="phone" class="mt-0.5 size-5 text-slate-400" />
+                                <div>
+                                    <dt class="sr-only">Teléfono</dt>
+                                    <dd><a href="tel:{{ preg_replace('/[^\d+]/', '', $appointment->customer_phone) }}" class="font-medium text-teal-700 hover:underline">{{ $appointment->customer_phone }}</a></dd>
+                                </div>
+                            </div>
                         @endif
-                        @if ($appointment->cancelled_at)
-                            <dd>Cancelada el {{ $appointment->cancelled_at->setTimezone($this->business->timezone)->translatedFormat('j \d\e F, H:i') }} por {{ $appointment->cancelled_by?->value === 'customer' ? 'el cliente' : 'el negocio' }}</dd>
+                        @if ($appointment->notes)
+                            <div class="rounded-lg bg-amber-50 p-3 text-amber-900 ring-1 ring-amber-600/10">
+                                <dt class="text-xs font-semibold tracking-wide uppercase">Nota del cliente</dt>
+                                <dd class="mt-1">{{ $appointment->notes }}</dd>
+                            </div>
                         @endif
-                    </div>
-                </dl>
+                        <div class="border-t border-slate-100 pt-5 text-xs text-slate-500">
+                            <dt class="sr-only">Historial</dt>
+                            <dd>Reservada el {{ $appointment->created_at->setTimezone($this->business->timezone)->translatedFormat('j \d\e F, H:i') }}</dd>
+                            @if ($appointment->confirmed_at)
+                                <dd>Confirmada el {{ $appointment->confirmed_at->setTimezone($this->business->timezone)->translatedFormat('j \d\e F, H:i') }}</dd>
+                            @endif
+                            @if ($appointment->cancelled_at)
+                                <dd>Cancelada el {{ $appointment->cancelled_at->setTimezone($this->business->timezone)->translatedFormat('j \d\e F, H:i') }} por {{ $appointment->cancelled_by?->value === 'customer' ? 'el cliente' : 'el negocio' }}</dd>
+                            @endif
+                        </div>
+                    </dl>
+                @endif
 
-                @if ($appointment->status->isActive())
+                @if ($rescheduling)
+                    @php
+                        $newTime = $rescheduleStartsAt ? \Carbon\CarbonImmutable::parse($rescheduleStartsAt) : null;
+                    @endphp
+                    <footer class="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+                        <p class="min-w-0 text-sm">
+                            <span class="block text-slate-500">Nuevo horario</span>
+                            <span class="block truncate font-semibold text-slate-900 first-letter:uppercase">{{ $newTime ? $newTime->translatedFormat('D j M, H:i') : 'Sin elegir' }}</span>
+                        </p>
+                        <div class="flex shrink-0 gap-2">
+                            <button type="button" wire:click="stopRescheduling" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver</button>
+                            <button type="button" wire:click="reschedule" @disabled(! $newTime) wire:loading.attr="disabled" wire:target="reschedule"
+                                    class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-50">Guardar</button>
+                        </div>
+                    </footer>
+                @elseif ($appointment->status->isActive())
                     <footer class="border-t border-slate-100 bg-slate-50 px-6 py-4">
                         <x-admin.appointment-actions :appointment="$appointment" size="lg" />
                     </footer>

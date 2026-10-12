@@ -8,6 +8,7 @@ use App\Models\Business;
 use App\Models\Service;
 use App\Services\AppointmentBooker;
 use App\Services\AvailabilityService;
+use App\Support\TimeSlots;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -213,21 +214,7 @@ class BookingWizard extends Component
     #[Computed]
     public function slotGroups(): array
     {
-        $groups = [
-            ['label' => 'Mañana', 'icon' => 'sun', 'slots' => []],
-            ['label' => 'Tarde', 'icon' => 'sunset', 'slots' => []],
-            ['label' => 'Noche', 'icon' => 'moon', 'slots' => []],
-        ];
-
-        foreach ($this->timeSlots as $start) {
-            $groups[match (true) {
-                $start->hour < 12 => 0,
-                $start->hour < 19 => 1,
-                default => 2,
-            }]['slots'][] = $start;
-        }
-
-        return array_values(array_filter($groups, fn (array $group) => $group['slots'] !== []));
+        return TimeSlots::groupByPartOfDay($this->timeSlots);
     }
 
     #[Computed]

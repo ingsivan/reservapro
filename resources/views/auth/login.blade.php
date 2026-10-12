@@ -3,9 +3,12 @@
         @csrf
         <x-field name="email" type="email" label="Correo" autocomplete="email" required autofocus />
         <x-field name="password" type="password" label="Contraseña" autocomplete="current-password" required />
-        <label class="flex items-center gap-2 text-sm text-slate-600">
-            <input type="checkbox" name="remember" class="size-4 rounded border-slate-300 accent-teal-600"> Recordarme
-        </label>
+        <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2 text-sm text-slate-600">
+                <input type="checkbox" name="remember" class="size-4 rounded border-slate-300 accent-teal-600"> Recordarme
+            </label>
+            <a href="{{ route('password.request') }}" class="text-sm font-medium text-teal-700 hover:underline">¿Olvidaste tu contraseña?</a>
+        </div>
         <button class="w-full rounded-lg bg-teal-600 px-4 py-2.5 font-semibold text-white hover:bg-teal-500">Entrar</button>
     </form>
 

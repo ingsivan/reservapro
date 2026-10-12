@@ -32,15 +32,22 @@ En la pantalla de confirmación y en la página de tu cita:
 - **Google Calendar** abre el evento ya lleno.
 - **Apple / Outlook (.ics)** descarga un archivo que abre cualquier calendario.
 
-### Ver o cancelar tu cita
+### Ver, cambiar o cancelar tu cita
 
 - Abre el enlace **Ver o cancelar mi cita** del correo. No necesitas contraseña: el enlace está firmado y solo sirve para esa cita.
-- Pulsa **Cancelar mi cita** y confirma. El negocio recibe un aviso y el horario queda libre.
-- Solo puedes cancelar en línea hasta cierto tiempo antes (2 horas en la demo). Después, la página te muestra el teléfono del negocio.
+- **Cambiar horario:** elige otro día y hora libres y pulsa **Cambiar mi cita**. El negocio recibe un aviso con el horario anterior y el nuevo. Tu cita conserva su código y su estado.
+- **Cancelar mi cita:** confirma en la ventana. El negocio recibe un aviso y el horario queda libre.
+- Solo puedes cambiar o cancelar en línea hasta cierto tiempo antes (2 horas en la demo). Después, la página te muestra el teléfono del negocio.
 
 ### Con cuenta de cliente
 
-Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis citas** ves tus citas próximas y anteriores y puedes cancelar.
+Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis citas** ves tus citas próximas y anteriores y puedes cambiarlas o cancelarlas.
+
+### Olvidé mi contraseña
+
+1. En **Entrar**, pulsa **¿Olvidaste tu contraseña?** y escribe tu correo.
+2. Abre el enlace del correo (vence en 60 minutos) y elige una contraseña nueva.
+3. Entra con la contraseña nueva. Por seguridad, la respuesta es la misma aunque el correo no tenga cuenta.
 
 ## Para el dueño del negocio
 
@@ -58,9 +65,10 @@ Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis 
 - **Calendario:** cada bloque es una cita. La línea roja marca la hora actual. Usa las flechas para cambiar de semana y **Hoy** para regresar.
 - **Clic en una cita:** abre un panel con el cliente, su correo y teléfono (con enlace para escribir o llamar), la nota que dejó y el historial de la cita.
 - **Acciones:**
-  - Antes de la cita: **Confirmar** (si está por confirmar) o **Cancelar**.
+  - Antes de la cita: **Confirmar** (si está por confirmar), **Reprogramar** o **Cancelar**.
+  - **Reprogramar** muestra los días y horas libres en el mismo panel. Elige uno y pulsa **Guardar**: la agenda salta a ese día.
   - Después de la hora de inicio: **Atendida** o **No asistió**.
-  - Al confirmar o cancelar, el cliente recibe un correo.
+  - Al confirmar, reprogramar o cancelar, el cliente recibe un correo.
 - En el celular, toca un día de la fila superior para ver sus citas.
 
 ### Servicios
