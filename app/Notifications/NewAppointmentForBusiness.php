@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\StaffMember;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -31,6 +32,7 @@ class NewAppointmentForBusiness extends Notification implements ShouldQueue
             ->greeting('Tienes una nueva reservación')
             ->line("**Cliente:** {$appointment->customer_name} ({$appointment->customer_email})")
             ->line("**Servicio:** {$appointment->service->name}")
+            ->when($appointment->staffMember, fn (MailMessage $message, StaffMember $staffMember) => $message->line("**Con:** {$staffMember->name}"))
             ->line("**Fecha:** {$appointment->whenLabel()}");
 
         if ($appointment->status === AppointmentStatus::Pending) {

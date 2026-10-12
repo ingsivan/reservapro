@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['business_id', 'name', 'description', 'duration_minutes', 'price_cents', 'is_active'])]
@@ -29,6 +30,11 @@ class Service extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function staffMembers(): BelongsToMany
+    {
+        return $this->belongsToMany(StaffMember::class);
     }
 
     public function appointments(): HasMany

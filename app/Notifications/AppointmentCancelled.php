@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Appointment;
+use App\Models\StaffMember;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,6 +38,7 @@ class AppointmentCancelled extends Notification implements ShouldQueue
                 ->greeting('Se liberó un horario')
                 ->line("{$appointment->customer_name} canceló su cita de {$appointment->service->name}.")
                 ->line("**Fecha:** {$appointment->whenLabel()}")
+                ->when($appointment->staffMember, fn (MailMessage $message, StaffMember $staffMember) => $message->line("**Con:** {$staffMember->name}"))
                 ->action('Ver la agenda', route('admin.agenda'));
         }
 

@@ -6,6 +6,7 @@ use App\Exceptions\SlotUnavailableException;
 use App\Models\Appointment;
 use App\Models\Business;
 use App\Models\Service;
+use App\Models\StaffMember;
 use App\Services\AppointmentBooker;
 use App\Services\AvailabilityService;
 use App\Support\TimeSlots;
@@ -33,6 +34,9 @@ class BookingWizard extends Component
     public int $step = 1;
 
     public ?int $serviceId = null;
+
+    /** Who the customer wants to book with (null: whoever is free). */
+    public ?int $staffMemberId = null;
 
     public ?string $date = null;
 
@@ -67,10 +71,29 @@ class BookingWizard extends Component
     public function selectService(int $serviceId): void
     {
         $this->serviceId = $this->services->firstWhere('id', $serviceId)?->id;
+        unset($this->selectedService, $this->staffOptions);
+        $this->staffMemberId = $this->staffOptions->firstWhere('id', $this->staffMemberId)?->id;
         $this->startsAt = null;
         $this->date = $this->firstAvailableDate();
         $this->step = $this->serviceId ? 2 : 1;
         $this->resetErrorBag();
+    }
+
+    /**
+     * Book with a specific person, or with whoever is free (null), keeping
+     * the selected day when it still has free times.
+     */
+    public function selectStaff(?int $staffMemberId): void
+    {
+        $this->staffMemberId = $this->staffOptions->firstWhere('id', $staffMemberId)?->id;
+        $this->startsAt = null;
+        unset($this->selectedStaffMember, $this->availability);
+
+        if (empty($this->availability[$this->date] ?? [])) {
+            $this->date = $this->firstAvailableDate();
+        }
+
+        $this->resetErrorBag('slot');
     }
 
     public function selectDate(string $date): void
@@ -141,6 +164,7 @@ class BookingWizard extends Component
                     'notes' => $this->notes ?: null,
                 ],
                 auth()->user(),
+                staffMember: $this->selectedStaffMember,
             );
         } catch (SlotUnavailableException $exception) {
             $this->startsAt = null;
@@ -158,7 +182,7 @@ class BookingWizard extends Component
 
     public function startOver(): void
     {
-        $this->reset('step', 'serviceId', 'date', 'startsAt', 'notes', 'bookedCode');
+        $this->reset('step', 'serviceId', 'staffMemberId', 'date', 'startsAt', 'notes', 'bookedCode');
     }
 
     /**
@@ -174,6 +198,28 @@ class BookingWizard extends Component
     public function selectedService(): ?Service
     {
         return $this->services->firstWhere('id', $this->serviceId)?->setRelation('business', $this->business);
+    }
+
+    /**
+     * People the customer can choose for the selected service. Empty when
+     * the business works without a team.
+     *
+     * @return Collection<int, StaffMember>
+     */
+    #[Computed]
+    public function staffOptions(): Collection
+    {
+        if ($this->selectedService === null || ! $this->business->hasTeam()) {
+            return new Collection;
+        }
+
+        return app(AvailabilityService::class)->staffFor($this->selectedService);
+    }
+
+    #[Computed]
+    public function selectedStaffMember(): ?StaffMember
+    {
+        return $this->staffOptions->firstWhere('id', $this->staffMemberId);
     }
 
     /**
@@ -194,6 +240,7 @@ class BookingWizard extends Component
             $this->selectedService,
             $today,
             $today->addDays($this->business->booking_window_days),
+            staffMember: $this->selectedStaffMember,
         );
     }
 
@@ -227,7 +274,7 @@ class BookingWizard extends Component
     public function bookedAppointment(): ?Appointment
     {
         return $this->bookedCode
-            ? $this->business->appointments()->with('service', 'business')->where('code', $this->bookedCode)->first()
+            ? $this->business->appointments()->with('service', 'business', 'staffMember')->where('code', $this->bookedCode)->first()
             : null;
     }
 

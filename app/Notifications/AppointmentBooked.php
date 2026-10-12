@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\StaffMember;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -37,6 +38,7 @@ class AppointmentBooked extends Notification implements ShouldQueue
                 ? 'Recibimos tu solicitud de cita. El negocio la revisará y te escribiremos en cuanto la confirme.'
                 : 'Tu cita quedó confirmada. Estos son los detalles:')
             ->line("**Servicio:** {$appointment->service->name}")
+            ->when($appointment->staffMember, fn (MailMessage $message, StaffMember $staffMember) => $message->line("**Te atiende:** {$staffMember->name}"))
             ->line("**Fecha:** {$appointment->whenLabel()}")
             ->line("**Precio:** {$appointment->formattedPrice()}")
             ->line("**Código:** {$appointment->code}")

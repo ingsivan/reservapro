@@ -50,6 +50,7 @@ class AdminPanelTest extends TestCase
         return [
             'agenda' => ['admin.agenda'],
             'servicios' => ['admin.services'],
+            'equipo' => ['admin.team'],
             'horario' => ['admin.schedule'],
             'ajustes' => ['admin.settings'],
             'reportes' => ['admin.reports'],

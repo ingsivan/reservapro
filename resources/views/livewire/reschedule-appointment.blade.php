@@ -8,7 +8,7 @@
         <x-icon name="arrow-left" class="size-4" /> Tu cita
     </a>
     <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">Cambiar horario</h1>
-    <p class="text-sm text-slate-500">{{ $appointment->service->name }} en {{ $business->name }} · {{ $appointment->service->formattedDuration() }}</p>
+    <p class="text-sm text-slate-500">{{ $appointment->service->name }}{{ $appointment->staffMember ? ' con '.$appointment->staffMember->firstName() : '' }} en {{ $business->name }} · {{ $appointment->service->formattedDuration() }}</p>
 
     <div class="mt-5 flex items-center gap-3 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-700">
         <x-icon name="calendar" class="size-5 text-slate-500" />

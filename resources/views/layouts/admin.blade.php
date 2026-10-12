@@ -7,6 +7,7 @@
     $links = [
         ['admin.agenda', 'Agenda', 'calendar'],
         ['admin.services', 'Servicios', 'tag'],
+        ['admin.team', 'Equipo', 'users'],
         ['admin.schedule', 'Horario', 'clock'],
         ['admin.reports', 'Reportes', 'chart'],
         ['admin.settings', 'Ajustes', 'sliders'],

@@ -15,7 +15,7 @@
                             <p class="font-semibold text-slate-900">{{ $appointment->service->name }}</p>
                             <x-status-badge :status="$appointment->status" />
                         </div>
-                        <p class="text-sm text-slate-600">{{ $appointment->business->name }}</p>
+                        <p class="text-sm text-slate-600">{{ $appointment->business->name }}{{ $appointment->staffMember ? ' · con '.$appointment->staffMember->firstName() : '' }}</p>
                         <p class="text-sm text-slate-600 first-letter:uppercase">{{ $appointment->whenLabel() }}</p>
                     </div>
                 </div>

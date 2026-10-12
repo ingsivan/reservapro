@@ -6,23 +6,31 @@ use App\Livewire\Concerns\ManagesBusiness;
 use App\Livewire\Concerns\ShowsNotices;
 use App\Models\BlockedDate;
 use App\Models\Schedule;
+use App\Models\StaffMember;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * Weekly opening hours and closed days.
+ * Weekly opening hours and closed days. With a team, each person works the
+ * business's hours or hours of their own.
  */
 #[Layout('layouts::admin')]
 #[Title('Horario')]
 class ScheduleManager extends Component
 {
     use ManagesBusiness, ShowsNotices;
+
+    /** Whose hours are shown: a staff member, or the business (null). */
+    #[Url(as: 'equipo')]
+    public ?int $staffMemberId = null;
 
     public int|string $newDay = 1;
 
@@ -34,8 +42,61 @@ class ScheduleManager extends Component
 
     public string $blockedReason = '';
 
+    public function mount(): void
+    {
+        $this->showHoursOf($this->staffMemberId);
+    }
+
+    public function showHoursOf(?int $staffMemberId): void
+    {
+        $this->staffMemberId = $staffMemberId ? $this->business->staffMembers()->find($staffMemberId)?->id : null;
+        $this->resetValidation();
+        unset($this->staffMember, $this->schedulesByDay);
+    }
+
+    /**
+     * Start the staff member's own hours from a copy of the business's.
+     */
+    public function useOwnHours(): void
+    {
+        $staffMember = $this->staffMember;
+
+        if ($staffMember === null || $staffMember->schedules()->exists()) {
+            return;
+        }
+
+        foreach ($this->business->schedules()->get() as $schedule) {
+            $staffMember->schedules()->create([
+                'business_id' => $this->business->id,
+                'day_of_week' => $schedule->day_of_week,
+                'opens_at' => $schedule->opensAtTime(),
+                'closes_at' => $schedule->closesAtTime(),
+            ]);
+        }
+
+        $this->notify("Copiamos el horario del negocio. Ajústalo para {$staffMember->firstName()}.");
+        unset($this->schedulesByDay);
+    }
+
+    public function useBusinessHours(): void
+    {
+        $staffMember = $this->staffMember;
+
+        if ($staffMember === null) {
+            return;
+        }
+
+        $staffMember->schedules()->delete();
+        $this->notify("{$staffMember->firstName()} vuelve a trabajar en el horario del negocio.");
+        unset($this->schedulesByDay);
+    }
+
     public function addWindow(): void
     {
+        if ($this->followsBusinessHours) {
+            return;
+        }
+
         $validated = $this->validate([
             'newDay' => ['required', 'integer', 'between:0,6'],
             'newOpensAt' => ['required', 'date_format:H:i'],
@@ -52,7 +113,8 @@ class ScheduleManager extends Component
             return;
         }
 
-        $this->business->schedules()->create([
+        $this->editableSchedules()->create([
+            'business_id' => $this->business->id,
             'day_of_week' => $day,
             'opens_at' => $validated['newOpensAt'],
             'closes_at' => $validated['newClosesAt'],
@@ -64,7 +126,7 @@ class ScheduleManager extends Component
 
     public function removeWindow(int $scheduleId): void
     {
-        $this->business->schedules()->findOrFail($scheduleId)->delete();
+        $this->editableSchedules()->findOrFail($scheduleId)->delete();
         $this->notify('Horario eliminado. Las citas ya reservadas se mantienen.');
         unset($this->schedulesByDay);
     }
@@ -110,13 +172,42 @@ class ScheduleManager extends Component
         unset($this->blockedDates);
     }
 
+    #[Computed]
+    public function staffMember(): ?StaffMember
+    {
+        return $this->staffMemberId ? $this->business->staffMembers()->find($this->staffMemberId) : null;
+    }
+
     /**
+     * @return Collection<int, StaffMember>
+     */
+    #[Computed]
+    public function staffMembers(): Collection
+    {
+        return $this->business->staffMembers()->withCount('schedules')->orderByDesc('is_active')->orderBy('name')->get();
+    }
+
+    /**
+     * Whether the selected staff member works the business's hours.
+     */
+    #[Computed]
+    public function followsBusinessHours(): bool
+    {
+        return $this->staffMember !== null && ! $this->staffMember->schedules()->exists();
+    }
+
+    /**
+     * The windows shown: the business's, or the staff member's own (or the
+     * business's again, read only, when they don't have any).
+     *
      * @return array<int, array{day: int, name: string, windows: Collection<int, Schedule>}>
      */
     #[Computed]
     public function schedulesByDay(): array
     {
-        $schedules = $this->business->schedules()->orderBy('opens_at')->get()->groupBy('day_of_week');
+        unset($this->followsBusinessHours);
+        $query = $this->followsBusinessHours ? $this->business->schedules() : $this->editableSchedules();
+        $schedules = $query->orderBy('opens_at')->get()->groupBy('day_of_week');
 
         return collect([1, 2, 3, 4, 5, 6, 0])
             ->map(fn (int $day) => [
@@ -145,13 +236,21 @@ class ScheduleManager extends Component
     }
 
     /**
+     * The schedules being edited: the business's, or the staff member's own.
+     */
+    private function editableSchedules(): HasMany
+    {
+        return $this->staffMember?->schedules() ?? $this->business->schedules();
+    }
+
+    /**
      * Compare minute ranges; windows that cross midnight end after 24:00.
      */
     private function overlapsExistingWindow(int $day, string $opensAt, string $closesAt): bool
     {
         [$start, $end] = $this->minuteRange($opensAt, $closesAt);
 
-        return $this->business->schedules()->where('day_of_week', $day)->get()
+        return $this->editableSchedules()->where('day_of_week', $day)->get()
             ->contains(function (Schedule $schedule) use ($start, $end) {
                 [$otherStart, $otherEnd] = $this->minuteRange($schedule->opensAtTime(), $schedule->closesAtTime());
 

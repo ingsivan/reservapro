@@ -39,7 +39,7 @@ class MyAppointments extends Component
     public function upcoming(): Collection
     {
         return auth()->user()->appointments()
-            ->with('business', 'service')
+            ->with('business', 'service', 'staffMember')
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
             ->get();

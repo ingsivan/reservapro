@@ -16,6 +16,7 @@ No hace falta crear una cuenta.
 1. Abre la página del negocio, por ejemplo `/reservar/barberia-demo`. Arriba verás si está abierto ahora y su horario.
 2. **Servicio:** elige uno. Cada tarjeta muestra precio y duración.
 3. **Día y hora:**
+   - Si el negocio tiene equipo, arriba eliges **con quién**: una persona o "Quien esté libre" (ves más horarios).
    - Los días muestran cuántos horarios libres quedan. Usa las flechas para ver más días.
    - Las horas se agrupan en mañana, tarde y noche. Elige una.
 4. **Tus datos:** escribe tu nombre y correo (teléfono y notas son opcionales) y pulsa **Confirmar reserva**. En el celular, el botón está en la barra inferior.
@@ -56,12 +57,14 @@ Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis 
 1. Pulsa **Crear cuenta**, elige "Tengo un negocio" y escribe su nombre. Se crea con un horario de ejemplo.
 2. En **Servicios**, crea lo que ofreces.
 3. En **Horario**, ajusta los días y horas en que atiendes.
-4. En **Ajustes**, copia el enlace de tu página de reservas y compártelo (redes, WhatsApp, Google Maps). También está en el menú lateral.
+4. Si trabajas con más personas, agrégalas en **Equipo**.
+5. En **Ajustes**, copia el enlace de tu página de reservas y compártelo (redes, WhatsApp, Google Maps). También está en el menú lateral.
 
 ### Agenda
 
 - **Arriba:** citas de hoy, citas por confirmar, citas de la semana e ingresos estimados. Pulsa "Por confirmar" para ver solo esas.
-- **Filtros:** muestra solo las citas de un estado (por confirmar, confirmadas, atendidas…).
+- **Filtros:** muestra solo las citas de un estado (por confirmar, confirmadas, atendidas…) o, con equipo, de una persona.
+- **Con equipo:** cada cita lleva el color de quien atiende, y las citas a la misma hora se ven lado a lado.
 - **Calendario:** cada bloque es una cita. La línea roja marca la hora actual. Usa las flechas para cambiar de semana y **Hoy** para regresar.
 - **Clic en una cita:** abre un panel con el cliente, su correo y teléfono (con enlace para escribir o llamar), la nota que dejó y el historial de la cita.
 - **Acciones:**
@@ -74,7 +77,7 @@ Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis 
 ### Agendar una cita por teléfono o sin cita
 
 1. En la agenda, pulsa **Nueva cita** (o **Agendar en este día** si el día está vacío).
-2. Elige el servicio, el día y la hora. Aquí no aplica la anticipación mínima, así que puedes agendar a alguien que acaba de llegar.
+2. Elige el servicio, con quién (si tienes equipo), el día y la hora. Aquí no aplica la anticipación mínima, así que puedes agendar a alguien que acaba de llegar.
 3. Escribe el nombre del cliente. Teléfono, correo y notas son opcionales.
 4. Pulsa **Crear cita**. Queda confirmada y la agenda salta a ese día.
 
@@ -86,11 +89,19 @@ Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el 
 - El interruptor de cada tarjeta lo muestra u oculta en tu página sin borrarlo.
 - **Eliminar** borra el servicio. Si ya tiene citas registradas, solo lo oculta para conservar el historial.
 
+### Equipo
+
+- **Agregar persona** pide nombre, puesto (opcional), un color para la agenda y los servicios que ofrece.
+- La primera persona que agregas se queda con las citas que ya tenías. Desde ahí, cada persona tiene su agenda y se pueden atender varias citas a la misma hora.
+- Los servicios nuevos los ofrece todo el equipo; quítalos en **Editar** si alguien no los hace.
+- El interruptor deja de recibir reservas con esa persona sin borrar sus citas. **Quitar** la borra si no tiene citas; si tiene, solo la desactiva.
+
 ### Horario
 
 - Agrega una o varias ventanas por día (por ejemplo, 10:00–14:00 y 16:00–20:00). La barra de cada día las dibuja sobre las 24 horas.
 - Si la hora de cierre es menor que la de apertura (22:00–02:00), el turno termina al día siguiente.
 - En **Días cerrados**, bloquea festivos o vacaciones. Ese día nadie podrá reservar.
+- Con equipo, arriba eliges de quién es el horario. Cada persona trabaja el horario del negocio hasta que pulsas **Usar un horario propio** (empieza como copia del del negocio). **Usar el horario del negocio** lo regresa.
 
 ### Reportes
 

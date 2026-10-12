@@ -45,7 +45,7 @@ class BusinessReport
     public function appointments(): Collection
     {
         return $this->appointments ??= $this->business->appointments()
-            ->with('service')
+            ->with('service', 'staffMember')
             ->where('starts_at', '>=', $this->from()->utc())
             ->where('starts_at', '<', $this->until()->utc())
             ->orderBy('starts_at')
@@ -93,15 +93,38 @@ class BusinessReport
      */
     public function byService(): array
     {
+        return $this->breakdown($this->appointments(), 'service_id', fn (Appointment $appointment) => $appointment->service->name);
+    }
+
+    /**
+     * People of the team sorted by income, with their share of the total.
+     * Empty for a business without a team.
+     *
+     * @return list<array{name: string, appointments: int, revenueCents: int, share: float}>
+     */
+    public function byStaff(): array
+    {
+        $withStaff = $this->appointments()->whereNotNull('staff_member_id');
+
+        return $withStaff->isEmpty() ? [] : $this->breakdown($withStaff, 'staff_member_id', fn (Appointment $appointment) => $appointment->staffMember->name);
+    }
+
+    /**
+     * @param  Collection<int, Appointment>  $appointments
+     * @param  callable(Appointment): string  $name
+     * @return list<array{name: string, appointments: int, revenueCents: int, share: float}>
+     */
+    private function breakdown(Collection $appointments, string $groupBy, callable $name): array
+    {
         $totalRevenue = max(1, $this->summarize($this->appointments())['revenueCents']);
 
-        return $this->appointments()
-            ->groupBy('service_id')
-            ->map(function (Collection $appointments) use ($totalRevenue) {
-                $summary = $this->summarize($appointments);
+        return $appointments
+            ->groupBy($groupBy)
+            ->map(function (Collection $group) use ($totalRevenue, $name) {
+                $summary = $this->summarize($group);
 
                 return [
-                    'name' => $appointments->first()->service->name,
+                    'name' => $name($group->first()),
                     'appointments' => $summary['appointments'],
                     'revenueCents' => $summary['revenueCents'],
                     'share' => $summary['revenueCents'] / $totalRevenue,

@@ -27,6 +27,9 @@
             </div>
 
             <dl class="grid gap-4 px-6 py-5 text-sm sm:grid-cols-2">
+                @if ($appointment->staffMember)
+                    <div><dt class="text-slate-500">Te atiende</dt><dd class="font-medium text-slate-900">{{ $appointment->staffMember->name }}</dd></div>
+                @endif
                 <div><dt class="text-slate-500">A nombre de</dt><dd class="font-medium text-slate-900">{{ $appointment->customer_name }}</dd></div>
                 <div><dt class="text-slate-500">Código</dt><dd class="font-mono font-semibold tracking-widest text-slate-900">{{ $appointment->code }}</dd></div>
                 <div><dt class="text-slate-500">Precio</dt><dd class="font-medium text-slate-900">{{ $appointment->formattedPrice() }}</dd></div>

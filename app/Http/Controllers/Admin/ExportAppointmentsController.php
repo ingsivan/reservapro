@@ -23,7 +23,7 @@ class ExportAppointmentsController extends Controller
             $output = fopen('php://output', 'w');
             // Byte order mark, so Excel reads the accents as UTF-8.
             fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['Código', 'Fecha', 'Inicio', 'Fin', 'Servicio', 'Cliente', 'Correo', 'Teléfono', 'Estado', 'Precio', 'Notas'], escape: '');
+            fputcsv($output, ['Código', 'Fecha', 'Inicio', 'Fin', 'Servicio', 'Atiende', 'Cliente', 'Correo', 'Teléfono', 'Estado', 'Precio', 'Notas'], escape: '');
 
             foreach ($report->appointments() as $appointment) {
                 fputcsv($output, [
@@ -32,6 +32,7 @@ class ExportAppointmentsController extends Controller
                     $appointment->localStartsAt()->format('H:i'),
                     $appointment->localEndsAt()->format('H:i'),
                     $appointment->service->name,
+                    $appointment->staffMember?->name,
                     $appointment->customer_name,
                     $appointment->customer_email,
                     $appointment->customer_phone,

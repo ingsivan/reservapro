@@ -6,6 +6,7 @@
     $monthly = $report->monthly();
     $totals = $report->totals();
     $services = $report->byService();
+    $staffBreakdown = $report->byStaff();
     $maxRevenue = max(1, max(array_column($monthly, 'revenueCents')));
     $currentMonth = $this->business->now()->format('Y-m');
     $statCards = [
@@ -126,25 +127,31 @@
                 </details>
             </section>
 
-            {{-- Income per service --}}
-            <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
-                <h2 class="font-semibold text-slate-900">Por servicio</h2>
-                <p class="text-sm text-slate-500">Qué servicios dejan más ingresos en el periodo.</p>
-                <ul class="mt-5 space-y-4">
-                    @foreach ($services as $service)
-                        <li wire:key="service-{{ $loop->index }}-{{ $service['name'] }}">
-                            <div class="flex items-baseline justify-between gap-3 text-sm">
-                                <p class="truncate font-medium text-slate-900">{{ $service['name'] }}</p>
-                                <p class="shrink-0 font-semibold text-slate-900 tabular-nums">{{ Money::format($service['revenueCents']) }}</p>
-                            </div>
-                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
-                                <div class="h-full rounded-full bg-teal-600" style="width: {{ round($service['share'] * 100, 1) }}%"></div>
-                            </div>
-                            <p class="mt-1 text-xs text-slate-500 tabular-nums">{{ trans_choice(':count cita|:count citas', $service['appointments']) }} · {{ number_format($service['share'] * 100, 0) }} % de los ingresos</p>
-                        </li>
-                    @endforeach
-                </ul>
-            </section>
+            <div class="space-y-6 xl:col-span-2">
+                @foreach (array_filter([
+                    ['Por servicio', 'Qué servicios dejan más ingresos en el periodo.', $services],
+                    ['Por persona', 'Cuánto atendió cada persona del equipo.', $staffBreakdown],
+                ], fn (array $section) => $section[2]) as [$heading, $subheading, $rows])
+                    <section wire:key="breakdown-{{ $loop->index }}" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <h2 class="font-semibold text-slate-900">{{ $heading }}</h2>
+                        <p class="text-sm text-slate-500">{{ $subheading }}</p>
+                        <ul class="mt-5 space-y-4">
+                            @foreach ($rows as $row)
+                                <li wire:key="breakdown-{{ $loop->parent->index }}-{{ $loop->index }}">
+                                    <div class="flex items-baseline justify-between gap-3 text-sm">
+                                        <p class="truncate font-medium text-slate-900">{{ $row['name'] }}</p>
+                                        <p class="shrink-0 font-semibold text-slate-900 tabular-nums">{{ Money::format($row['revenueCents']) }}</p>
+                                    </div>
+                                    <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+                                        <div class="h-full rounded-full bg-teal-600" style="width: {{ round($row['share'] * 100, 1) }}%"></div>
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-500 tabular-nums">{{ trans_choice(':count cita|:count citas', $row['appointments']) }} · {{ number_format($row['share'] * 100, 0) }} % de los ingresos</p>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endforeach
+            </div>
         </div>
     @endif
 </div>

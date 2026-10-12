@@ -13,6 +13,7 @@ use App\Livewire\Admin\BusinessSettings;
 use App\Livewire\Admin\Reports;
 use App\Livewire\Admin\ScheduleManager;
 use App\Livewire\Admin\Services;
+use App\Livewire\Admin\Team;
 use App\Livewire\BookingWizard;
 use App\Livewire\MyAppointments;
 use App\Livewire\RescheduleAppointment;
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('admin')->prefix('panel')->name('admin.')->group(function () {
         Route::livewire('/', Agenda::class)->name('agenda');
         Route::livewire('/servicios', Services::class)->name('services');
+        Route::livewire('/equipo', Team::class)->name('team');
         Route::livewire('/horario', ScheduleManager::class)->name('schedule');
         Route::livewire('/reportes', Reports::class)->name('reports');
         Route::get('/reportes/citas.csv', ExportAppointmentsController::class)->name('reports.export');

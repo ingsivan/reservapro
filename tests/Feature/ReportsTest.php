@@ -138,8 +138,8 @@ class ReportsTest extends TestCase
         $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
         $lines = explode("\n", trim(substr($csv, 3)));
         $this->assertCount(2, $lines);
-        $this->assertSame('Código,Fecha,Inicio,Fin,Servicio,Cliente,Correo,Teléfono,Estado,Precio,Notas', $lines[0]);
-        $this->assertStringContainsString(',2026-10-05,10:00,11:00,"Corte clásico","Ana López",ana@example.com,', $lines[1]);
+        $this->assertSame('Código,Fecha,Inicio,Fin,Servicio,Atiende,Cliente,Correo,Teléfono,Estado,Precio,Notas', $lines[0]);
+        $this->assertStringContainsString(',2026-10-05,10:00,11:00,"Corte clásico",,"Ana López",ana@example.com,', $lines[1]);
         $this->assertStringEndsWith(',Confirmada,300.00,"Trae su foto, ""corte bajo"""', $lines[1]);
     }
 

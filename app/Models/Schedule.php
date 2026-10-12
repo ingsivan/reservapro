@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * A day can have several windows (split shifts). When `closes_at` is not
  * after `opens_at`, the window runs past midnight into the next day.
  */
-#[Fillable(['business_id', 'day_of_week', 'opens_at', 'closes_at'])]
+#[Fillable(['business_id', 'staff_member_id', 'day_of_week', 'opens_at', 'closes_at'])]
 class Schedule extends Model
 {
     /** @use HasFactory<ScheduleFactory> */
@@ -32,6 +32,11 @@ class Schedule extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function staffMember(): BelongsTo
+    {
+        return $this->belongsTo(StaffMember::class);
     }
 
     public static function dayName(int $dayOfWeek): string
