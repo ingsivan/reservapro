@@ -102,6 +102,9 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 | `App\Http\Controllers\Auth\ForgotPasswordController`, `ResetPasswordController` | Recuperar la contraseña con el broker de Laravel. |
 | `App\Http\Controllers\ManageAppointmentController` | Ver y cancelar una cita desde el enlace firmado del correo, y descargarla como `.ics`. |
 | `resources/views/components` | Piezas de interfaz compartidas: iconos (`x-icon`), avisos tipo toast (`x-toaster`), ventana de confirmación (`x-confirm-dialog`), selector de día y hora (`x-time-picker`) y acciones de una cita en el panel. |
+| `App\Services\BusinessReport` | Ingresos y citas de los últimos meses, por mes y por servicio, contados en la zona horaria del negocio. |
+| `App\Livewire\Admin\Reports` | Pantalla de reportes con la gráfica y el cambio de periodo. |
+| `App\Http\Controllers\Admin\ExportAppointmentsController` | Descarga en CSV (UTF-8 con BOM, para que Excel lea los acentos) de las citas del periodo. |
 | `App\Console\Commands\SendAppointmentReminders` | Recordatorio por correo 24 horas antes (cada 15 minutos con el Scheduler). |
 
 ## Pruebas

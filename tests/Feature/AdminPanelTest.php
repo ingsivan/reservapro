@@ -52,6 +52,7 @@ class AdminPanelTest extends TestCase
             'servicios' => ['admin.services'],
             'horario' => ['admin.schedule'],
             'ajustes' => ['admin.settings'],
+            'reportes' => ['admin.reports'],
         ];
     }
 

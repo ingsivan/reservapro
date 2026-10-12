@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ExportAppointmentsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ManageAppointmentController;
 use App\Livewire\Admin\Agenda;
 use App\Livewire\Admin\BusinessSettings;
+use App\Livewire\Admin\Reports;
 use App\Livewire\Admin\ScheduleManager;
 use App\Livewire\Admin\Services;
 use App\Livewire\BookingWizard;
@@ -47,6 +49,8 @@ Route::middleware('auth')->group(function () {
         Route::livewire('/', Agenda::class)->name('agenda');
         Route::livewire('/servicios', Services::class)->name('services');
         Route::livewire('/horario', ScheduleManager::class)->name('schedule');
+        Route::livewire('/reportes', Reports::class)->name('reports');
+        Route::get('/reportes/citas.csv', ExportAppointmentsController::class)->name('reports.export');
         Route::livewire('/ajustes', BusinessSettings::class)->name('settings');
     });
 });

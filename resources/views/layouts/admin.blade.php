@@ -8,6 +8,7 @@
         ['admin.agenda', 'Agenda', 'calendar'],
         ['admin.services', 'Servicios', 'tag'],
         ['admin.schedule', 'Horario', 'clock'],
+        ['admin.reports', 'Reportes', 'chart'],
         ['admin.settings', 'Ajustes', 'sliders'],
     ];
 @endphp
@@ -105,7 +106,7 @@
                        'border-teal-600 text-teal-700' => request()->routeIs($route),
                        'border-transparent text-slate-600 hover:text-slate-900' => ! request()->routeIs($route),
                    ])
-                   @if (request()->routeIs($route)) aria-current="page" @endif>
+                   @if (request()->routeIs($route)) aria-current="page" x-init="$el.scrollIntoView({ block: 'nearest', inline: 'nearest' })" @endif>
                     <x-icon :name="$icon" class="size-4" />
                     {{ $label }}
                 </a>
