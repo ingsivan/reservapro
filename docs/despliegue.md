@@ -14,7 +14,7 @@ Al arrancar, `docker/start.sh`:
 
 1. Crea la base SQLite si no existe y la llena con el negocio demo (desactívalo con `SEED_DEMO_DATA=false`).
 2. Corre las migraciones y `php artisan optimize`.
-3. Lanza el worker de la cola (correos) y el scheduler (recordatorios) en segundo plano.
+3. Lanza el worker de la cola (correos y WhatsApp) y el scheduler (recordatorios) en segundo plano.
 4. Sirve la web con `php artisan serve` y 4 workers (`WEB_WORKERS`).
 
 Todo en un solo contenedor, porque el plan gratuito de Render no incluye workers aparte. CI construye esta imagen y comprueba que `/up` y la página de inicio respondan en cada PR.
@@ -80,6 +80,27 @@ MAIL_FROM_ADDRESS=citas@tu-dominio.com
 MAIL_FROM_NAME=ReservaPro
 ```
 
+## WhatsApp
+
+Sin credenciales, los mensajes de WhatsApp se escriben en el log. Para enviarlos de verdad se usa la API de WhatsApp Cloud de Meta (gratis para empezar; Meta cobra por conversación según el país):
+
+1. En [developers.facebook.com](https://developers.facebook.com) crea una app de tipo **Negocio** y agrégale el producto **WhatsApp**.
+2. En **WhatsApp > Configuración de la API** copia el **Identificador del número de teléfono**. Para producción, agrega tu propio número y crea un token permanente con un **usuario del sistema** en el Business Manager (el token de prueba vence en 24 horas).
+3. En **WhatsApp Manager > Plantillas de mensajes** crea estas cinco plantillas, categoría **Utilidad**, idioma **Español (MEX)**. El texto de cada una está en `App\Notifications\Messages\WhatsAppMessage::TEMPLATES`, con las variables `{{1}}` a `{{5}}` (nombre, negocio, servicio, fecha y enlace):
+   - `cita_confirmada`
+   - `cita_solicitada`
+   - `recordatorio_cita`
+   - `cita_reprogramada`
+   - `cita_cancelada`
+4. Cuando Meta las apruebe, agrega las variables en Render (**Environment**) y vuelve a desplegar:
+
+```env
+WHATSAPP_TOKEN=tu-token
+WHATSAPP_PHONE_NUMBER_ID=123456789012345
+```
+
+Opcionales: `WHATSAPP_API_VERSION` (por defecto `v21.0`) y `WHATSAPP_TEMPLATE_LANGUAGE` (por defecto `es_MX`, debe coincidir con el idioma de las plantillas). Con el número de prueba de Meta solo puedes escribir a los números que registres como destinatarios.
+
 ## Variables de entorno
 
 | Variable | Para qué |
@@ -89,6 +110,7 @@ MAIL_FROM_NAME=ReservaPro
 | `TRUSTED_PROXIES` | `*` detrás de un proxy como Render, para HTTPS y límites por IP correctos. |
 | `SEED_DEMO_DATA` | `false` para no cargar el negocio demo en una base nueva. |
 | `WEB_WORKERS` | Procesos del servidor web (4 por defecto). |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` | Credenciales de WhatsApp Cloud. Sin ellas, los mensajes van al log. |
 
 ## Otras plataformas
 

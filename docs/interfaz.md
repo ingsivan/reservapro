@@ -41,7 +41,7 @@ Están en `resources/views/components`.
 | `x-staff-picker` | "¿Con quién?": "Quien esté libre" y una opción por persona. Llama al método `select` de Livewire (por defecto `selectStaff`). Se usa en la reserva y en Nueva cita. | `<x-staff-picker :staff="$this->staffOptions" :selected="$staffMemberId" />` |
 | `x-business-avatar` | Logo del negocio, o sus iniciales sobre un cuadro oscuro si no tiene. El tamaño y la forma van en `class`. | `<x-business-avatar :business="$business" class="size-9 rounded-lg" />` |
 
-Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `chart`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
+Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `chart`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `message`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
 
 ### Mostrar un aviso
 

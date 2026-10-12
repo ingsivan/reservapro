@@ -40,7 +40,7 @@ class AppointmentBooker
      * In a business with a team, the appointment goes to $staffMember, or to
      * the least busy person who offers the service and is free at that time.
      *
-     * @param  array{customer_name: string, customer_email: ?string, customer_phone?: ?string, notes?: ?string}  $customer
+     * @param  array{customer_name: string, customer_email: ?string, customer_phone?: ?string, whatsapp_opt_in?: bool, notes?: ?string}  $customer
      *
      * @throws SlotUnavailableException
      */
@@ -65,6 +65,7 @@ class AppointmentBooker
                 'customer_name' => $customer['customer_name'],
                 'customer_email' => $customer['customer_email'],
                 'customer_phone' => $customer['customer_phone'] ?? null,
+                'whatsapp_opt_in' => $customer['whatsapp_opt_in'] ?? false,
                 'notes' => $customer['notes'] ?? null,
                 'starts_at' => $startsAt->utc(),
                 'ends_at' => $startsAt->addMinutes($service->duration_minutes)->utc(),

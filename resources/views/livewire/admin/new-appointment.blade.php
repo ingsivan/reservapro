@@ -56,8 +56,12 @@
                         <div class="grid gap-4 border-t border-slate-100 pt-6">
                             <x-field name="customerName" label="Nombre del cliente" wire:model="customerName" autocomplete="off" required />
                             <x-field name="customerPhone" type="tel" label="Teléfono (opcional)" wire:model="customerPhone" autocomplete="off" />
+                            <label class="-mt-2 flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <input type="checkbox" wire:model="whatsappReminders" class="size-4 rounded border-slate-300 accent-emerald-600">
+                                Enviarle los avisos por WhatsApp
+                            </label>
                             <x-field name="customerEmail" type="email" label="Correo (opcional)" wire:model="customerEmail" autocomplete="off"
-                                     hint="Si lo escribes, le enviamos la confirmación, el recordatorio y el enlace para cambiar o cancelar." />
+                                     hint="Si lo escribes, le enviamos por correo la confirmación, el recordatorio y el enlace para cambiar o cancelar." />
                             <x-field name="notes" type="textarea" label="Notas (opcional)" wire:model="notes" />
                         </div>
                     @endif

@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\StaffMember;
 use App\Services\AppointmentBooker;
 use App\Services\AvailabilityService;
+use App\Support\PhoneNumber;
 use App\Support\TimeSlots;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -51,6 +52,9 @@ class BookingWizard extends Component
 
     #[Validate('nullable|string|max:40')]
     public string $customerPhone = '';
+
+    /** Also send the confirmation, reminder and changes by WhatsApp. */
+    public bool $whatsappReminders = false;
 
     #[Validate('nullable|string|max:500')]
     public string $notes = '';
@@ -138,6 +142,12 @@ class BookingWizard extends Component
     {
         $this->validate();
 
+        if ($this->whatsappReminders && PhoneNumber::toE164($this->customerPhone) === null) {
+            $this->addError('customerPhone', 'Escribe tu celular a 10 dígitos para recibir los avisos por WhatsApp.');
+
+            return;
+        }
+
         if ($this->selectedService === null || $this->startsAt === null) {
             $this->startsAt = null;
             $this->step = $this->selectedService ? 2 : 1;
@@ -161,6 +171,7 @@ class BookingWizard extends Component
                     'customer_name' => $this->customerName,
                     'customer_email' => $this->customerEmail,
                     'customer_phone' => $this->customerPhone ?: null,
+                    'whatsapp_opt_in' => $this->whatsappReminders,
                     'notes' => $this->notes ?: null,
                 ],
                 auth()->user(),

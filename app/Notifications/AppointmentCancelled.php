@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Models\Appointment;
 use App\Models\StaffMember;
 use App\Models\User;
+use App\Notifications\Concerns\ReachesCustomers;
+use App\Notifications\Messages\WhatsAppMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,17 +18,9 @@ use Illuminate\Notifications\Notification;
  */
 class AppointmentCancelled extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ReachesCustomers;
 
     public function __construct(public Appointment $appointment) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
-    }
 
     public function toMail(object $notifiable): MailMessage
     {
@@ -48,5 +42,18 @@ class AppointmentCancelled extends Notification implements ShouldQueue
             ->line("{$appointment->business->name} tuvo que cancelar tu cita de {$appointment->service->name} del {$appointment->whenLabel()}.")
             ->line('Lamentamos el inconveniente. Puedes elegir otro horario cuando quieras.')
             ->action('Reservar de nuevo', route('booking', $appointment->business));
+    }
+
+    public function toWhatsApp(object $notifiable): WhatsAppMessage
+    {
+        $appointment = $this->appointment;
+
+        return WhatsAppMessage::template('cita_cancelada', [
+            $appointment->customer_name,
+            $appointment->business->name,
+            $appointment->serviceLabel(),
+            $appointment->whenLabel(),
+            route('booking', $appointment->business),
+        ]);
     }
 }

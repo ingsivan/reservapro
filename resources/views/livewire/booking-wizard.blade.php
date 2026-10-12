@@ -70,6 +70,11 @@
                             Te enviamos los detalles a <strong class="text-slate-900">{{ $appointment->customer_email }}</strong>. ¡Te esperamos!
                         @endif
                     </p>
+                    @if ($whatsappNumber = $appointment->whatsappNumber())
+                        <p class="mt-3 inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900 ring-1 ring-emerald-600/15">
+                            <x-icon name="message" class="size-4 text-emerald-600" /> También te escribiremos por WhatsApp al {{ $whatsappNumber }}.
+                        </p>
+                    @endif
 
                     <dl class="mt-6 divide-y divide-slate-100 rounded-xl border border-slate-200 text-sm">
                         @foreach ([
@@ -229,7 +234,14 @@
                         <form id="booking-form" wire:submit="book" class="mt-5 grid gap-4 sm:grid-cols-2">
                             <x-field name="customerName" label="Nombre completo" wire:model="customerName" autocomplete="name" placeholder="Ana López" required />
                             <x-field name="customerEmail" type="email" label="Correo" wire:model="customerEmail" autocomplete="email" placeholder="ana@correo.com" required />
-                            <x-field name="customerPhone" type="tel" label="Teléfono (opcional)" wire:model="customerPhone" autocomplete="tel" placeholder="55 1234 5678" />
+                            <x-field name="customerPhone" type="tel" label="Celular (opcional)" wire:model="customerPhone" autocomplete="tel" placeholder="55 1234 5678" />
+                            <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 text-sm has-checked:border-emerald-600 has-checked:bg-emerald-50/60 sm:col-span-2">
+                                <input type="checkbox" wire:model="whatsappReminders" class="mt-0.5 size-4 rounded border-slate-300 accent-emerald-600">
+                                <span>
+                                    <span class="flex items-center gap-1.5 font-medium text-slate-900"><x-icon name="message" class="size-4 text-emerald-600" /> Recibir los avisos también por WhatsApp</span>
+                                    <span class="block text-slate-500">La confirmación, el recordatorio un día antes y cualquier cambio, a tu celular.</span>
+                                </span>
+                            </label>
                             <div class="sm:col-span-2">
                                 <x-field name="notes" type="textarea" label="Notas para el negocio (opcional)" wire:model="notes" placeholder="¿Algo que debamos saber?" />
                             </div>
