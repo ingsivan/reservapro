@@ -31,6 +31,13 @@ class Agenda extends Component
     #[Url]
     public string $date = '';
 
+    /** Only show appointments with this status ('' shows all). */
+    #[Url(as: 'estado', except: '')]
+    public string $statusFilter = '';
+
+    /** Appointment open in the side panel. */
+    public ?int $openAppointmentId = null;
+
     public function mount(): void
     {
         $this->date = $this->parseDate($this->date)->toDateString();
@@ -54,6 +61,24 @@ class Agenda extends Component
     public function goToToday(): void
     {
         $this->showDate($this->business->now());
+    }
+
+    public function filterByStatus(string $status): void
+    {
+        $this->statusFilter = AppointmentStatus::tryFrom($status)?->value ?? '';
+        unset($this->visibleAppointments, $this->dayAppointments);
+    }
+
+    public function viewAppointment(int $appointmentId): void
+    {
+        $this->openAppointmentId = $this->findAppointment($appointmentId)->id;
+        unset($this->openAppointment);
+    }
+
+    public function closeAppointment(): void
+    {
+        $this->openAppointmentId = null;
+        unset($this->openAppointment);
     }
 
     public function confirm(int $appointmentId, AppointmentBooker $booker): void
@@ -116,12 +141,37 @@ class Agenda extends Component
     }
 
     /**
+     * Week appointments after applying the status filter.
+     *
+     * @return \Illuminate\Support\Collection<string, Collection<int, Appointment>>
+     */
+    #[Computed]
+    public function visibleAppointments(): \Illuminate\Support\Collection
+    {
+        if ($this->statusFilter === '') {
+            return $this->weekAppointments;
+        }
+
+        return $this->weekAppointments
+            ->map(fn (Collection $day) => $day->filter(fn (Appointment $appointment) => $appointment->status->value === $this->statusFilter)->values())
+            ->filter(fn (Collection $day) => $day->isNotEmpty());
+    }
+
+    /**
      * @return Collection<int, Appointment>
      */
     #[Computed]
     public function dayAppointments(): Collection
     {
-        return $this->weekAppointments->get($this->date, new Collection);
+        return $this->visibleAppointments->get($this->date, new Collection);
+    }
+
+    #[Computed]
+    public function openAppointment(): ?Appointment
+    {
+        return $this->openAppointmentId
+            ? $this->business->appointments()->with('service', 'business')->find($this->openAppointmentId)
+            : null;
     }
 
     /**
@@ -183,7 +233,7 @@ class Agenda extends Component
     private function showDate(CarbonImmutable $date): void
     {
         $this->date = $date->toDateString();
-        unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->dayAppointments, $this->gridHours, $this->stats);
+        unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->gridHours, $this->stats);
     }
 
     private function markPast(int $appointmentId, AppointmentStatus $status): void
@@ -199,7 +249,7 @@ class Agenda extends Component
     private function findAppointment(int $appointmentId): Appointment
     {
         $appointment = $this->business->appointments()->with('service', 'business.owner')->findOrFail($appointmentId);
-        unset($this->weekAppointments, $this->dayAppointments, $this->stats);
+        unset($this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->stats, $this->openAppointment);
 
         return $appointment;
     }

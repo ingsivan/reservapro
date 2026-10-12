@@ -1,187 +1,364 @@
-<div class="grid gap-8 lg:grid-cols-[1fr_18rem]">
-    <div class="min-w-0">
-        <div class="mb-8">
-            <p class="text-sm font-medium text-teal-700">Reserva en línea</p>
-            <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-900">{{ $business->name }}</h1>
-            @if ($business->description)
-                <p class="mt-2 max-w-2xl text-slate-600">{{ $business->description }}</p>
-            @endif
+@php
+    use App\Enums\AppointmentStatus;
+    use Carbon\CarbonImmutable;
+
+    $service = $this->selectedService;
+    $selectedTime = $this->selectedSlot;
+    $openingStatus = $business->openingStatus();
+    $steps = [1 => 'Servicio', 2 => 'Día y hora', 3 => 'Tus datos'];
+    $reachable = [1 => true, 2 => $service !== null, 3 => $selectedTime !== null];
+    $selectedDay = $date ? CarbonImmutable::parse($date) : null;
+    $openWeekdays = $business->schedules->pluck('day_of_week')->unique()->all();
+@endphp
+
+<div>
+    {{-- Business header --}}
+    <header class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="relative h-24 bg-linear-to-br from-teal-700 via-teal-500 to-emerald-400 sm:h-32">
+            <div class="bg-dots absolute inset-0"></div>
         </div>
-
-        @if ($this->bookedAppointment)
-            @php($appointment = $this->bookedAppointment)
-            <section class="rounded-xl border border-emerald-200 bg-white p-6 shadow-sm sm:p-8" aria-live="polite">
-                <div class="flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <h2 class="mt-4 text-2xl font-bold text-slate-900">
-                    {{ $appointment->status === \App\Enums\AppointmentStatus::Pending ? '¡Solicitud enviada!' : '¡Cita confirmada!' }}
-                </h2>
-                <p class="mt-2 text-slate-600">
-                    @if ($appointment->status === \App\Enums\AppointmentStatus::Pending)
-                        {{ $business->name }} revisará tu solicitud y te avisaremos por correo cuando la confirme.
-                    @else
-                        Te enviamos los detalles a <strong>{{ $appointment->customer_email }}</strong>.
+        <div class="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:gap-5 sm:px-6">
+            <div class="relative -mt-10 flex size-20 shrink-0 self-start items-center justify-center rounded-2xl border-4 border-white bg-slate-900 text-2xl font-bold text-white shadow-md sm:-mt-12 sm:size-24 sm:text-3xl">
+                {{ $business->initials() }}
+            </div>
+            <div class="min-w-0 flex-1 sm:pt-4">
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $business->name }}</h1>
+                @if ($business->description)
+                    <p class="mt-1 max-w-2xl text-slate-600">{{ $business->description }}</p>
+                @endif
+                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
+                    <span @class([
+                        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-medium ring-1 ring-inset',
+                        'bg-emerald-50 text-emerald-800 ring-emerald-600/20' => $openingStatus['isOpen'],
+                        'bg-slate-100 text-slate-700 ring-slate-500/20' => ! $openingStatus['isOpen'],
+                    ])>
+                        <span @class(['size-2 rounded-full', 'bg-emerald-500' => $openingStatus['isOpen'], 'bg-slate-400' => ! $openingStatus['isOpen']])></span>
+                        {{ $openingStatus['label'] }}
+                    </span>
+                    @if ($business->address)
+                        <span class="inline-flex items-center gap-1.5"><x-icon name="map-pin" class="size-4 text-slate-400" /> {{ $business->address }}</span>
                     @endif
-                </p>
-                <dl class="mt-6 grid gap-4 rounded-lg bg-slate-50 p-4 text-sm sm:grid-cols-2">
-                    <div><dt class="text-slate-500">Servicio</dt><dd class="font-medium text-slate-900">{{ $appointment->service->name }}</dd></div>
-                    <div><dt class="text-slate-500">Fecha</dt><dd class="font-medium text-slate-900 first-letter:uppercase">{{ $appointment->whenLabel() }}</dd></div>
-                    <div><dt class="text-slate-500">Precio</dt><dd class="font-medium text-slate-900">{{ $appointment->formattedPrice() }}</dd></div>
-                    <div><dt class="text-slate-500">Código</dt><dd class="font-mono font-semibold tracking-wider text-slate-900">{{ $appointment->code }}</dd></div>
-                </dl>
-                <div class="mt-6 flex flex-wrap gap-3">
-                    <a href="{{ $appointment->manageUrl() }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ver o cancelar mi cita</a>
-                    <button type="button" wire:click="startOver" class="rounded-lg px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50">Reservar otra cita</button>
-                </div>
-            </section>
-        @else
-            <ol class="space-y-6">
-                {{-- Step 1: service --}}
-                <li class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="flex items-center gap-3 font-semibold text-slate-900">
-                        <span class="flex size-7 items-center justify-center rounded-full bg-teal-600 text-sm text-white">1</span>
-                        Elige un servicio
-                    </h2>
-                    @if ($this->services->isEmpty())
-                        <p class="mt-4 text-sm text-slate-500">Este negocio todavía no tiene servicios disponibles.</p>
-                    @else
-                        <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                            @foreach ($this->services as $service)
-                                <button type="button" wire:click="selectService({{ $service->id }})" wire:key="service-{{ $service->id }}"
-                                        @class([
-                                            'rounded-lg border p-4 text-left transition',
-                                            'border-teal-600 bg-teal-50 ring-1 ring-teal-600' => $serviceId === $service->id,
-                                            'border-slate-200 hover:border-slate-300 hover:bg-slate-50' => $serviceId !== $service->id,
-                                        ])
-                                        aria-pressed="{{ $serviceId === $service->id ? 'true' : 'false' }}">
-                                    <span class="flex items-start justify-between gap-3">
-                                        <span class="font-medium text-slate-900">{{ $service->name }}</span>
-                                        <span class="shrink-0 font-semibold text-slate-900">{{ $service->formattedPrice() }}</span>
-                                    </span>
-                                    <span class="mt-1 block text-sm text-slate-500">{{ $service->formattedDuration() }}</span>
-                                    @if ($service->description)
-                                        <span class="mt-2 block text-sm text-slate-600">{{ $service->description }}</span>
-                                    @endif
-                                </button>
-                            @endforeach
-                        </div>
+                    @if ($business->phone)
+                        <a href="tel:{{ preg_replace('/[^\d+]/', '', $business->phone) }}" class="inline-flex items-center gap-1.5 hover:text-teal-700"><x-icon name="phone" class="size-4 text-slate-400" /> {{ $business->phone }}</a>
                     @endif
-                </li>
+                </div>
+            </div>
+        </div>
+    </header>
 
-                {{-- Step 2: day and time --}}
-                <li @class(['rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6', 'opacity-60' => ! $this->selectedService])>
-                    <h2 class="flex items-center gap-3 font-semibold text-slate-900">
-                        <span @class(['flex size-7 items-center justify-center rounded-full text-sm', 'bg-teal-600 text-white' => $this->selectedService, 'bg-slate-200 text-slate-600' => ! $this->selectedService])>2</span>
-                        Elige día y hora
-                    </h2>
-
-                    @if ($this->selectedService)
-                        @error('slot')
-                            <p class="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">{{ $message }}</p>
-                        @enderror
-
-                        @if (collect($this->availability)->filter()->isEmpty())
-                            <p class="mt-4 text-sm text-slate-500">No hay horarios libres en los próximos {{ $business->booking_window_days }} días. Prueba con otro servicio o vuelve más tarde.</p>
+    <div class="mt-8 grid scroll-mt-24 gap-8 lg:grid-cols-[1fr_20rem]"
+         x-data="{ reveal() { if ($el.getBoundingClientRect().top < 64) $el.scrollIntoView({ behavior: 'smooth' }) } }"
+         x-init="$watch('$wire.step', () => reveal()); $watch('$wire.bookedCode', () => reveal())">
+        <div class="min-w-0">
+            @if ($appointment = $this->bookedAppointment)
+                {{-- Done --}}
+                @php
+                    $isPending = $appointment->status === AppointmentStatus::Pending;
+                @endphp
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" aria-live="polite">
+                    <div @class(['flex size-14 items-center justify-center rounded-full motion-safe:animate-pop-in', 'bg-amber-100 text-amber-700' => $isPending, 'bg-emerald-100 text-emerald-700' => ! $isPending])>
+                        <x-icon :name="$isPending ? 'hourglass' : 'check'" class="size-7" />
+                    </div>
+                    <h2 class="mt-5 text-2xl font-bold text-slate-900">{{ $isPending ? '¡Solicitud enviada!' : '¡Cita confirmada!' }}</h2>
+                    <p class="mt-2 text-slate-600">
+                        @if ($isPending)
+                            {{ $business->name }} revisará tu solicitud y te avisaremos por correo a <strong class="text-slate-900">{{ $appointment->customer_email }}</strong> cuando la confirme.
                         @else
-                            <div class="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-2" role="listbox" aria-label="Días">
-                                @foreach ($this->availability as $day => $daySlots)
-                                    @php($dayDate = \Carbon\CarbonImmutable::parse($day))
-                                    <button type="button" wire:click="selectDate('{{ $day }}')" wire:key="day-{{ $day }}"
-                                            @disabled(empty($daySlots))
-                                            role="option" aria-selected="{{ $date === $day ? 'true' : 'false' }}"
+                            Te enviamos los detalles a <strong class="text-slate-900">{{ $appointment->customer_email }}</strong>. ¡Te esperamos!
+                        @endif
+                    </p>
+
+                    <dl class="mt-6 divide-y divide-slate-100 rounded-xl border border-slate-200 text-sm">
+                        @foreach ([
+                            ['tag', 'Servicio', $appointment->service->name.' · '.$appointment->service->formattedDuration()],
+                            ['calendar', 'Fecha y hora', $appointment->whenLabel()],
+                            ['wallet', 'Precio', $appointment->formattedPrice().' · se paga en el local'],
+                        ] as [$icon, $label, $value])
+                            <div class="flex items-start gap-3 px-4 py-3">
+                                <x-icon :name="$icon" class="mt-0.5 size-5 text-slate-400" />
+                                <dt class="w-28 shrink-0 text-slate-500">{{ $label }}</dt>
+                                <dd class="font-medium text-slate-900 first-letter:uppercase">{{ $value }}</dd>
+                            </div>
+                        @endforeach
+                        <div class="flex items-start gap-3 px-4 py-3">
+                            <x-icon name="check-circle" class="mt-0.5 size-5 text-slate-400" />
+                            <dt class="w-28 shrink-0 text-slate-500">Código</dt>
+                            <dd class="font-mono font-semibold tracking-widest text-slate-900">{{ $appointment->code }}</dd>
+                        </div>
+                    </dl>
+
+                    <p class="mt-6 text-sm font-medium text-slate-700">Guárdala en tu calendario</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <a href="{{ $appointment->googleCalendarUrl() }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                            <x-icon name="calendar-plus" class="size-4" /> Google Calendar
+                        </a>
+                        <a href="{{ $appointment->calendarFileUrl() }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                            <x-icon name="download" class="size-4" /> Apple / Outlook (.ics)
+                        </a>
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-3 border-t border-slate-100 pt-6">
+                        <a href="{{ $appointment->manageUrl() }}" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Ver o cancelar mi cita</a>
+                        <button type="button" wire:click="startOver" class="rounded-lg px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50">Reservar otra cita</button>
+                    </div>
+                </section>
+            @else
+                {{-- Progress --}}
+                <nav aria-label="Pasos de la reserva">
+                    <ol class="flex items-center gap-2 sm:gap-3">
+                        @foreach ($steps as $number => $label)
+                            <li @class(['flex items-center gap-2 sm:gap-3', 'flex-1' => $number < 3])>
+                                <button type="button" wire:click="goToStep({{ $number }})" @disabled(! $reachable[$number])
+                                        @if ($step === $number) aria-current="step" @endif
+                                        class="group flex items-center gap-2 disabled:cursor-not-allowed">
+                                    <span @class([
+                                        'flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition',
+                                        'bg-teal-600 text-white ring-4 ring-teal-600/15' => $step === $number,
+                                        'bg-teal-100 text-teal-700 group-hover:bg-teal-200' => $step > $number,
+                                        'bg-slate-100 text-slate-400' => $step < $number,
+                                    ])>
+                                        @if ($step > $number)
+                                            <x-icon name="check" class="size-4" />
+                                        @else
+                                            {{ $number }}
+                                        @endif
+                                    </span>
+                                    <span @class(['hidden text-sm font-medium sm:block', 'text-slate-900' => $step >= $number, 'text-slate-400' => $step < $number])>{{ $label }}</span>
+                                </button>
+                                @if ($number < 3)
+                                    <span @class(['h-0.5 flex-1 rounded-full', 'bg-teal-500' => $step > $number, 'bg-slate-200' => $step <= $number])></span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
+                </nav>
+
+                <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                    @if ($step === 1)
+                        {{-- Step 1: service --}}
+                        <h2 class="text-lg font-semibold text-slate-900">¿Qué servicio quieres?</h2>
+                        <p class="text-sm text-slate-500">Elige uno para ver los horarios libres.</p>
+
+                        @if ($this->services->isEmpty())
+                            <p class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">Este negocio todavía no tiene servicios disponibles.</p>
+                        @else
+                            <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                                @foreach ($this->services as $option)
+                                    <button type="button" wire:click="selectService({{ $option->id }})" wire:key="service-{{ $option->id }}"
+                                            aria-pressed="{{ $serviceId === $option->id ? 'true' : 'false' }}"
                                             @class([
-                                                'flex w-16 shrink-0 flex-col items-center rounded-lg border px-2 py-2 text-sm transition',
-                                                'border-teal-600 bg-teal-600 text-white' => $date === $day,
-                                                'border-slate-200 hover:border-teal-400' => $date !== $day && ! empty($daySlots),
-                                                'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300' => empty($daySlots),
+                                                'group relative flex flex-col rounded-xl border p-4 text-left transition',
+                                                'border-teal-600 bg-teal-50/60 ring-1 ring-teal-600' => $serviceId === $option->id,
+                                                'border-slate-200 hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md' => $serviceId !== $option->id,
                                             ])>
-                                        <span class="text-xs uppercase">{{ $dayDate->translatedFormat('D') }}</span>
-                                        <span class="text-lg font-semibold">{{ $dayDate->day }}</span>
-                                        <span class="text-xs">{{ $dayDate->translatedFormat('M') }}</span>
+                                        <span class="flex items-start justify-between gap-3">
+                                            <span class="font-semibold text-slate-900">{{ $option->name }}</span>
+                                            @if ($serviceId === $option->id)
+                                                <span class="flex size-5 items-center justify-center rounded-full bg-teal-600 text-white"><x-icon name="check" class="size-3.5" /></span>
+                                            @endif
+                                        </span>
+                                        @if ($option->description)
+                                            <span class="mt-1 text-sm text-slate-600">{{ $option->description }}</span>
+                                        @endif
+                                        <span class="mt-4 flex items-center justify-between gap-3 pt-1 text-sm">
+                                            <span class="inline-flex items-center gap-1.5 text-slate-500"><x-icon name="clock" class="size-4" /> {{ $option->formattedDuration() }}</span>
+                                            <span class="font-semibold text-slate-900">{{ $option->formattedPrice() }}</span>
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
+                        @endif
+                    @elseif ($step === 2 && $service)
+                        {{-- Step 2: day and time --}}
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg font-semibold text-slate-900">¿Cuándo te viene bien?</h2>
+                                <p class="text-sm text-slate-500">{{ $service->name }} · {{ $service->formattedDuration() }}</p>
+                            </div>
+                            <button type="button" wire:click="goToStep(1)" class="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                                <x-icon name="arrow-left" class="size-4" /> Servicio
+                            </button>
+                        </div>
 
-                            @if ($date)
-                                <p class="mt-4 text-sm font-medium text-slate-700 first-letter:uppercase">{{ \Carbon\CarbonImmutable::parse($date)->translatedFormat('l j \d\e F') }}</p>
-                                <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
-                                    @foreach ($this->timeSlots as $start)
-                                        <button type="button" wire:click="selectSlot('{{ $start->toIso8601String() }}')" wire:key="slot-{{ $start->getTimestamp() }}"
+                        @error('slot')
+                            <p class="mt-4 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
+                                <x-icon name="alert" class="mt-0.5 size-4" /> {{ $message }}
+                            </p>
+                        @enderror
+
+                        @if (collect($this->availability)->filter()->isEmpty())
+                            <p class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+                                No hay horarios libres en los próximos {{ $business->booking_window_days }} días. Prueba con otro servicio o vuelve más tarde.
+                            </p>
+                        @else
+                            <div class="mt-5" x-data="{ scroll(direction) { $refs.days.scrollBy({ left: direction * $refs.days.clientWidth * 0.8, behavior: 'smooth' }) } }"
+                                 x-init="$nextTick(() => { const selected = $refs.days.querySelector('[aria-selected=true]'); if (selected) $refs.days.scrollLeft = selected.offsetLeft - $refs.days.offsetLeft - 8 })">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-medium text-slate-700 first-letter:uppercase">{{ ($selectedDay ?? $business->now())->translatedFormat('F Y') }}</p>
+                                    <div class="flex gap-1">
+                                        <button type="button" x-on:click="scroll(-1)" class="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-50" aria-label="Días anteriores"><x-icon name="chevron-left" class="size-4" /></button>
+                                        <button type="button" x-on:click="scroll(1)" class="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-50" aria-label="Días siguientes"><x-icon name="chevron-right" class="size-4" /></button>
+                                    </div>
+                                </div>
+                                <div x-ref="days" class="no-scrollbar -mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-1" role="listbox" aria-label="Días">
+                                    @foreach ($this->availability as $day => $daySlots)
+                                        @php
+                                            $dayDate = CarbonImmutable::parse($day);
+                                            $isSelected = $date === $day;
+                                            $isFull = empty($daySlots);
+                                        @endphp
+                                        <button type="button" wire:click="selectDate('{{ $day }}')" wire:key="day-{{ $day }}" @disabled($isFull)
+                                                role="option" aria-selected="{{ $isSelected ? 'true' : 'false' }}"
                                                 @class([
-                                                    'rounded-lg border px-3 py-2 text-sm font-medium transition',
-                                                    'border-teal-600 bg-teal-600 text-white' => $startsAt === $start->toIso8601String(),
-                                                    'border-slate-200 text-slate-700 hover:border-teal-400 hover:text-teal-800' => $startsAt !== $start->toIso8601String(),
+                                                    'flex w-[4.25rem] shrink-0 snap-start flex-col items-center rounded-xl border px-1 py-2.5 transition',
+                                                    'border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-600/20' => $isSelected,
+                                                    'border-slate-200 text-slate-700 hover:border-teal-400 hover:bg-teal-50/50' => ! $isSelected && ! $isFull,
+                                                    'cursor-not-allowed border-dashed border-slate-200 text-slate-300' => $isFull,
                                                 ])>
-                                            {{ $start->format('H:i') }}
+                                            <span class="text-xs font-medium uppercase">{{ rtrim($dayDate->translatedFormat('D'), '.') }}</span>
+                                            <span class="text-xl leading-7 font-bold">{{ $dayDate->day }}</span>
+                                            <span @class(['text-[0.68rem] leading-4', 'text-teal-50' => $isSelected, 'text-emerald-600' => ! $isSelected && ! $isFull])>
+                                                {{ $isFull ? (in_array($dayDate->dayOfWeek, $openWeekdays) ? 'Sin lugar' : 'Cerrado') : trans_choice(':count libre|:count libres', count($daySlots)) }}
+                                            </span>
                                         </button>
                                     @endforeach
                                 </div>
+                            </div>
+
+                            @if ($selectedDay)
+                                <div class="mt-6 border-t border-slate-100 pt-5" wire:loading.class="opacity-50" wire:target="selectDate">
+                                    <p class="font-medium text-slate-900 first-letter:uppercase">{{ $selectedDay->translatedFormat('l j \d\e F') }}</p>
+                                    <div class="mt-4 space-y-5">
+                                        @foreach ($this->slotGroups as $group)
+                                            <div wire:key="group-{{ $date }}-{{ $group['label'] }}">
+                                                <p class="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                                                    <x-icon :name="$group['icon']" class="size-4" /> {{ $group['label'] }}
+                                                </p>
+                                                <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                                                    @foreach ($group['slots'] as $start)
+                                                        <button type="button" wire:click="selectSlot('{{ $start->toIso8601String() }}')" wire:key="slot-{{ $start->getTimestamp() }}"
+                                                                @class([
+                                                                    'rounded-lg border px-3 py-2.5 text-sm font-semibold tabular-nums transition',
+                                                                    'border-teal-600 bg-teal-600 text-white' => $startsAt === $start->toIso8601String(),
+                                                                    'border-slate-200 text-slate-700 hover:border-teal-500 hover:bg-teal-50 hover:text-teal-800' => $startsAt !== $start->toIso8601String(),
+                                                                ])>
+                                                            {{ $start->format('H:i') }}
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endif
                         @endif
-                    @endif
-                </li>
-
-                {{-- Step 3: contact details --}}
-                <li @class(['rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6', 'opacity-60' => ! $this->selectedSlot])>
-                    <h2 class="flex items-center gap-3 font-semibold text-slate-900">
-                        <span @class(['flex size-7 items-center justify-center rounded-full text-sm', 'bg-teal-600 text-white' => $this->selectedSlot, 'bg-slate-200 text-slate-600' => ! $this->selectedSlot])>3</span>
-                        Tus datos
-                    </h2>
-
-                    @if ($this->selectedSlot && $this->selectedService)
-                        <div class="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-900">
-                            <span>
-                                <strong>{{ $this->selectedService->name }}</strong> ·
-                                <span class="first-letter:uppercase">{{ $this->selectedSlot->translatedFormat('l j \d\e F, H:i') }}</span>
-                            </span>
-                            <button type="button" wire:click="changeSlot" class="font-medium text-teal-700 hover:underline">Cambiar</button>
+                    @elseif ($step === 3 && $service && $selectedTime)
+                        {{-- Step 3: contact details --}}
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg font-semibold text-slate-900">Tus datos</h2>
+                                <p class="text-sm text-slate-500">Solo los usamos para enviarte la confirmación y el recordatorio.</p>
+                            </div>
+                            <button type="button" wire:click="changeSlot" class="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                                <x-icon name="arrow-left" class="size-4" /> Horario
+                            </button>
                         </div>
 
-                        <form wire:submit="book" class="mt-4 grid gap-4 sm:grid-cols-2">
-                            <x-field name="customerName" label="Nombre completo" wire:model="customerName" autocomplete="name" required />
-                            <x-field name="customerEmail" type="email" label="Correo" wire:model="customerEmail" autocomplete="email" required />
-                            <x-field name="customerPhone" type="tel" label="Teléfono (opcional)" wire:model="customerPhone" autocomplete="tel" />
+                        <div class="mt-5 flex items-center gap-3 rounded-xl bg-teal-50 px-4 py-3 text-sm text-teal-900 ring-1 ring-teal-600/10">
+                            <x-icon name="calendar-check" class="size-5 text-teal-600" />
+                            <p><strong>{{ $service->name }}</strong> · <span class="first-letter:uppercase">{{ $selectedTime->translatedFormat('l j \d\e F, H:i') }}</span></p>
+                        </div>
+
+                        <form id="booking-form" wire:submit="book" class="mt-5 grid gap-4 sm:grid-cols-2">
+                            <x-field name="customerName" label="Nombre completo" wire:model="customerName" autocomplete="name" placeholder="Ana López" required />
+                            <x-field name="customerEmail" type="email" label="Correo" wire:model="customerEmail" autocomplete="email" placeholder="ana@correo.com" required />
+                            <x-field name="customerPhone" type="tel" label="Teléfono (opcional)" wire:model="customerPhone" autocomplete="tel" placeholder="55 1234 5678" />
                             <div class="sm:col-span-2">
-                                <x-field name="notes" type="textarea" label="Notas para el negocio (opcional)" wire:model="notes" />
+                                <x-field name="notes" type="textarea" label="Notas para el negocio (opcional)" wire:model="notes" placeholder="¿Algo que debamos saber?" />
                             </div>
-                            <div class="sm:col-span-2">
-                                <button type="submit" class="w-full rounded-lg bg-teal-600 px-4 py-3 font-semibold text-white hover:bg-teal-500 disabled:opacity-60 sm:w-auto" wire:loading.attr="disabled" wire:target="book">
-                                    <span wire:loading.remove wire:target="book">Confirmar reserva · {{ $this->selectedService->formattedPrice() }}</span>
+                            <div class="hidden sm:col-span-2 lg:block">
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-teal-500 disabled:opacity-60" wire:loading.attr="disabled" wire:target="book">
+                                    <svg wire:loading wire:target="book" class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity=".25" stroke-width="4"/><path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+                                    <span wire:loading.remove wire:target="book">Confirmar reserva · {{ $service->formattedPrice() }}</span>
                                     <span wire:loading wire:target="book">Reservando…</span>
                                 </button>
                                 <p class="mt-2 text-xs text-slate-500">Recibirás un correo con un enlace para cancelar si lo necesitas.</p>
                             </div>
                         </form>
                     @endif
-                </li>
-            </ol>
-        @endif
+                </section>
+            @endif
+        </div>
+
+        {{-- Sidebar --}}
+        <aside class="space-y-4 lg:sticky lg:top-24 lg:self-start">
+            @unless ($this->bookedAppointment)
+                <div class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:block">
+                    <h2 class="font-semibold text-slate-900">Tu reserva</h2>
+                    <dl class="mt-4 space-y-3 text-sm">
+                        @foreach ([
+                            ['tag', 'Servicio', $service?->name],
+                            ['calendar', 'Día', $selectedTime?->translatedFormat('l j \d\e F') ?? $selectedDay?->translatedFormat('l j \d\e F')],
+                            ['clock', 'Hora', $selectedTime ? $selectedTime->format('H:i').' – '.$selectedTime->addMinutes($service->duration_minutes)->format('H:i') : null],
+                        ] as [$icon, $label, $value])
+                            <div class="flex items-start gap-3">
+                                <x-icon :name="$icon" class="mt-0.5 size-4 text-slate-400" />
+                                <dt class="sr-only">{{ $label }}</dt>
+                                <dd @class(['first-letter:uppercase', 'font-medium text-slate-900' => $value, 'text-slate-400' => ! $value])>{{ $value ?? match ($label) { 'Servicio' => 'Elige un servicio', 'Día' => 'Elige un día', default => 'Elige una hora' } }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                    <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+                        <span class="text-sm text-slate-500">Total</span>
+                        <span class="text-lg font-bold text-slate-900">{{ $service?->formattedPrice() ?? '—' }}</span>
+                    </div>
+                    @if ($step === 3 && $service && $selectedTime)
+                        <button type="submit" form="booking-form" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 font-semibold text-white hover:bg-teal-500 disabled:opacity-60" wire:loading.attr="disabled" wire:target="book">
+                            <span wire:loading.remove wire:target="book">Confirmar reserva</span>
+                            <span wire:loading wire:target="book">Reservando…</span>
+                        </button>
+                    @endif
+                </div>
+            @endunless
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
+                <h2 class="flex items-center gap-2 font-semibold text-slate-900"><x-icon name="clock" class="size-4 text-slate-400" /> Horario</h2>
+                <dl class="mt-3 space-y-2">
+                    @foreach ($business->compactWeeklyHours() as $row)
+                        <div class="flex justify-between gap-4">
+                            <dt class="text-slate-600">{{ $row['days'] }}</dt>
+                            <dd @class(['text-right', 'font-medium text-slate-900' => $row['ranges'], 'text-slate-400' => ! $row['ranges']])>
+                                @forelse ($row['ranges'] as $range)
+                                    <span class="block tabular-nums">{{ $range }}</span>
+                                @empty
+                                    Cerrado
+                                @endforelse
+                            </dd>
+                        </div>
+                    @endforeach
+                </dl>
+                <p class="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">Horas en zona horaria {{ str_replace('_', ' ', $business->timezone) }}.</p>
+            </div>
+        </aside>
     </div>
 
-    <aside class="space-y-4 lg:pt-20">
-        <div class="rounded-xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
-            <h2 class="font-semibold text-slate-900">Horario</h2>
-            <dl class="mt-3 space-y-1.5">
-                @foreach ($business->weeklyHours() as $row)
-                    <div class="flex justify-between gap-4">
-                        <dt class="text-slate-600">{{ $row['day'] }}</dt>
-                        <dd class="text-right font-medium text-slate-900">{{ $row['ranges'] ? implode(', ', $row['ranges']) : 'Cerrado' }}</dd>
-                    </div>
-                @endforeach
-            </dl>
-            <p class="mt-3 text-xs text-slate-500">Horas en zona horaria {{ $business->timezone }}.</p>
-        </div>
-        @if ($business->address || $business->phone)
-            <div class="rounded-xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
-                <h2 class="font-semibold text-slate-900">Contacto</h2>
-                @if ($business->address)
-                    <p class="mt-2 text-slate-600">{{ $business->address }}</p>
-                @endif
-                @if ($business->phone)
-                    <p class="mt-1 text-slate-600">{{ $business->phone }}</p>
+    {{-- Mobile summary bar --}}
+    @if ($service && ! $this->bookedAppointment)
+        <div data-mobile-bar class="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(15,23,42,0.06)] backdrop-blur-md lg:hidden">
+            <div class="mx-auto flex max-w-xl items-center justify-between gap-3">
+                <div class="min-w-0 text-sm">
+                    <p class="truncate font-semibold text-slate-900">{{ $service->name }} · {{ $service->formattedPrice() }}</p>
+                    <p class="truncate text-slate-500 first-letter:uppercase">{{ $selectedTime ? $selectedTime->translatedFormat('D j M, H:i') : 'Elige día y hora' }}</p>
+                </div>
+                @if ($step === 3 && $selectedTime)
+                    <button type="submit" form="booking-form" class="shrink-0 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-60" wire:loading.attr="disabled" wire:target="book">
+                        <span wire:loading.remove wire:target="book">Confirmar</span>
+                        <span wire:loading wire:target="book">Reservando…</span>
+                    </button>
+                @elseif ($selectedTime)
+                    <button type="button" wire:click="goToStep(3)" class="shrink-0 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-500">Continuar</button>
                 @endif
             </div>
-        @endif
-    </aside>
+        </div>
+    @endif
 </div>

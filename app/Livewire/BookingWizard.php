@@ -28,6 +28,9 @@ class BookingWizard extends Component
     #[Locked]
     public Business $business;
 
+    /** Visible step: 1 service, 2 day and time, 3 contact details. */
+    public int $step = 1;
+
     public ?int $serviceId = null;
 
     public ?string $date = null;
@@ -65,6 +68,7 @@ class BookingWizard extends Component
         $this->serviceId = $this->services->firstWhere('id', $serviceId)?->id;
         $this->startsAt = null;
         $this->date = $this->firstAvailableDate();
+        $this->step = $this->serviceId ? 2 : 1;
         $this->resetErrorBag();
     }
 
@@ -81,7 +85,20 @@ class BookingWizard extends Component
         $this->startsAt = collect($this->timeSlots)->contains(fn (CarbonImmutable $start) => $start->toIso8601String() === $slot)
             ? $slot
             : null;
+        $this->step = $this->startsAt ? 3 : 2;
         $this->resetErrorBag('slot');
+    }
+
+    /**
+     * Jump back (or forward) to a step whose previous choices are already made.
+     */
+    public function goToStep(int $step): void
+    {
+        $this->step = match (true) {
+            $step === 3 && $this->selectedSlot !== null => 3,
+            $step >= 2 && $this->selectedService !== null => 2,
+            default => 1,
+        };
     }
 
     /**
@@ -90,6 +107,7 @@ class BookingWizard extends Component
     public function changeSlot(): void
     {
         $this->startsAt = null;
+        $this->step = 2;
     }
 
     public function book(AppointmentBooker $booker): void
@@ -98,6 +116,7 @@ class BookingWizard extends Component
 
         if ($this->selectedService === null || $this->startsAt === null) {
             $this->startsAt = null;
+            $this->step = $this->selectedService ? 2 : 1;
 
             return;
         }
@@ -124,6 +143,7 @@ class BookingWizard extends Component
             );
         } catch (SlotUnavailableException $exception) {
             $this->startsAt = null;
+            $this->step = 2;
             unset($this->availability);
             $this->addError('slot', $exception->getMessage());
 
@@ -137,7 +157,7 @@ class BookingWizard extends Component
 
     public function startOver(): void
     {
-        $this->reset('serviceId', 'date', 'startsAt', 'notes', 'bookedCode');
+        $this->reset('step', 'serviceId', 'date', 'startsAt', 'notes', 'bookedCode');
     }
 
     /**
@@ -183,6 +203,31 @@ class BookingWizard extends Component
     public function timeSlots(): array
     {
         return $this->availability[$this->date] ?? [];
+    }
+
+    /**
+     * Free times of the selected day split into morning, afternoon and evening.
+     *
+     * @return list<array{label: string, icon: string, slots: list<CarbonImmutable>}>
+     */
+    #[Computed]
+    public function slotGroups(): array
+    {
+        $groups = [
+            ['label' => 'Mañana', 'icon' => 'sun', 'slots' => []],
+            ['label' => 'Tarde', 'icon' => 'sunset', 'slots' => []],
+            ['label' => 'Noche', 'icon' => 'moon', 'slots' => []],
+        ];
+
+        foreach ($this->timeSlots as $start) {
+            $groups[match (true) {
+                $start->hour < 12 => 0,
+                $start->hour < 19 => 1,
+                default => 2,
+            }]['slots'][] = $start;
+        }
+
+        return array_values(array_filter($groups, fn (array $group) => $group['slots'] !== []));
     }
 
     #[Computed]

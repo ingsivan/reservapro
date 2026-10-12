@@ -132,9 +132,70 @@ class Appointment extends Model
         return URL::signedRoute('appointments.manage', ['appointment' => $this->code]);
     }
 
+    /**
+     * Signed link to download the appointment as an .ics calendar file.
+     */
+    public function calendarFileUrl(): string
+    {
+        return URL::signedRoute('appointments.calendar', ['appointment' => $this->code]);
+    }
+
+    /**
+     * Link that opens Google Calendar with the appointment pre-filled.
+     */
+    public function googleCalendarUrl(): string
+    {
+        return 'https://calendar.google.com/calendar/render?'.http_build_query([
+            'action' => 'TEMPLATE',
+            'text' => $this->calendarTitle(),
+            'dates' => $this->starts_at->utc()->format('Ymd\THis\Z').'/'.$this->ends_at->utc()->format('Ymd\THis\Z'),
+            'details' => $this->calendarDescription(),
+            'location' => (string) $this->business->address,
+        ], encoding_type: PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * The appointment as an iCalendar (RFC 5545) document.
+     */
+    public function toIcalendar(): string
+    {
+        $escape = fn (string $text) => str_replace(['\\', ';', ',', "\n"], ['\\\\', '\\;', '\\,', '\\n'], $text);
+
+        $lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//ReservaPro//Citas//ES',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VEVENT',
+            'UID:'.$this->code.'@reservapro',
+            'DTSTAMP:'.now()->utc()->format('Ymd\THis\Z'),
+            'DTSTART:'.$this->starts_at->utc()->format('Ymd\THis\Z'),
+            'DTEND:'.$this->ends_at->utc()->format('Ymd\THis\Z'),
+            'SUMMARY:'.$escape($this->calendarTitle()),
+            'DESCRIPTION:'.$escape($this->calendarDescription()),
+            'LOCATION:'.$escape((string) $this->business->address),
+            'STATUS:'.($this->status === AppointmentStatus::Cancelled ? 'CANCELLED' : 'CONFIRMED'),
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ];
+
+        return implode("\r\n", $lines)."\r\n";
+    }
+
     public function getRouteKeyName(): string
     {
         return 'code';
+    }
+
+    private function calendarTitle(): string
+    {
+        return "{$this->service->name} · {$this->business->name}";
+    }
+
+    private function calendarDescription(): string
+    {
+        return "Código de tu cita: {$this->code}\nVer o cancelar: {$this->manageUrl()}";
     }
 
     /**

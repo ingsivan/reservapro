@@ -9,7 +9,7 @@
 
 ## Enlaces firmados
 
-El cliente sin cuenta administra su cita con un enlace de `URL::signedRoute()`. La firma cubre la URL completa, así que no se puede cambiar el código para ver o cancelar la cita de otra persona; cualquier cambio da 403. El formulario de cancelar también va firmado.
+El cliente sin cuenta administra su cita con un enlace de `URL::signedRoute()`. La firma cubre la URL completa, así que no se puede cambiar el código para ver o cancelar la cita de otra persona; cualquier cambio da 403. El formulario de cancelar y la descarga del archivo `.ics` también van firmados.
 
 El código público de la cita (8 caracteres) no es el id de la base de datos y evita caracteres confusos (0/O, 1/I/L).
 

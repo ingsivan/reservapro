@@ -94,6 +94,9 @@ class Services extends Component
     {
         $service = $this->findService($serviceId);
         $service->update(['is_active' => ! $service->is_active]);
+        $this->notify($service->is_active
+            ? "«{$service->name}» ya aparece en tu página de reservas."
+            : "Ocultamos «{$service->name}». Ya no se puede reservar.");
         unset($this->services);
     }
 
@@ -132,7 +135,6 @@ class Services extends Component
     {
         return $this->business->services()
             ->withCount(['appointments as upcoming_count' => fn ($query) => $query->blocking()->where('starts_at', '>=', now())])
-            ->orderByDesc('is_active')
             ->orderBy('name')
             ->get();
     }

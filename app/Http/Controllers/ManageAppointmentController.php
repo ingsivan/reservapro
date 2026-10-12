@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Services\AppointmentBooker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
 
 /**
@@ -22,6 +23,19 @@ class ManageAppointmentController extends Controller
         return view('appointments.manage', [
             'appointment' => $appointment,
             'cancelUrl' => URL::signedRoute('appointments.cancel', ['appointment' => $appointment->code]),
+        ]);
+    }
+
+    /**
+     * Download the appointment as an .ics file for any calendar app.
+     */
+    public function calendar(Appointment $appointment): Response
+    {
+        $appointment->load('business', 'service');
+
+        return response($appointment->toIcalendar(), 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="cita-'.$appointment->code.'.ics"',
         ]);
     }
 
