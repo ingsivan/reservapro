@@ -92,6 +92,9 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [Reglas de negocio](docs/reglas-de-negocio.md): estados de una cita, quién puede cancelar y qué correos se envían.
 - [Seguridad](docs/seguridad.md): permisos, enlaces firmados y límites de uso.
 - [Despliegue](docs/despliegue.md): Docker y Render paso a paso.
+- [Interfaz](docs/interfaz.md): principios de diseño, componentes compartidos y cómo está armada cada pantalla.
+- [Guía de uso](docs/guia-de-uso.md): cómo reservar como cliente y cómo administrar el negocio.
+- [Pendientes](docs/pendientes.md): lo que falta, por prioridad.
 
 ## Hoja de ruta
 
@@ -102,15 +105,22 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Panel del administrador con agenda semanal y CRUD de servicios y horarios
 - [x] CI con GitHub Actions y Docker
 - [x] Publicar la demo
+- [x] Rediseño de la interfaz: asistente paso a paso, panel lateral de citas, filtros, toasts y confirmaciones
+- [x] Agregar la cita a Google Calendar o como `.ics`
+- [ ] Recuperar contraseña
+- [ ] Reprogramar citas y crearlas desde el panel
 - [ ] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp
+
+La lista completa, con prioridades y por dónde empezar cada punto, está en [Pendientes](docs/pendientes.md).
 
 ## Qué aprendí
 
 - Calcular disponibilidad es más difícil de lo que parece: zonas horarias, horario de verano y turnos que cruzan la medianoche obligan a separar "hora local del negocio" de "momento en UTC".
 - Evitar dobles reservas no se resuelve en la interfaz: hace falta una transacción con bloqueo y volver a validar en el servidor.
 - Livewire permite construir pantallas interactivas sin escribir JavaScript, pero hay que cuidar el estado (propiedades bloqueadas, propiedades calculadas y su caché).
+- Una buena experiencia de uso sale de muchos detalles pequeños: un paso a la vez, el resumen siempre visible, confirmar antes de lo irreversible y responder a cada acción. Con Alpine dentro de Livewire alcanza para toasts, ventanas y desplazamientos sin agregar dependencias.
 
 ## Créditos
 

@@ -67,7 +67,7 @@
 
     @if ($showForm)
         <div class="fixed inset-0 z-40 flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="service-form-title"
-             x-data x-on:keydown.escape.window="$wire.cancelForm()">
+             x-data x-on:keydown.escape.window="$wire.cancelForm()" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
             <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] motion-safe:animate-fade-in" wire:click="cancelForm"></div>
             <form wire:submit="save" class="relative w-full max-w-lg overflow-hidden rounded-t-2xl bg-white shadow-2xl motion-safe:animate-fade-in sm:rounded-2xl">
                 <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">

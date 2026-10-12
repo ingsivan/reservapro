@@ -1,0 +1,55 @@
+# Pendientes
+
+Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué resuelve y por dónde empezar en el código. Al terminar uno, márcalo aquí y en la hoja de ruta del README.
+
+## Ya hecho
+
+- [x] Modelos, disponibilidad con casos difíciles y reserva sin dobles reservas
+- [x] Correos de confirmación, recordatorio y cancelación con enlace firmado
+- [x] Panel del negocio: agenda, servicios, horario, días cerrados y ajustes
+- [x] CI con GitHub Actions, Docker y demo en Render
+- [x] Rediseño de la interfaz: asistente paso a paso, panel lateral de citas, filtros, toasts y ventana de confirmación ([interfaz](interfaz.md))
+- [x] Agregar la cita a Google Calendar o descargarla como `.ics`
+- [x] Aviso de abierto o cerrado y horario resumido en la página del negocio
+
+## Prioridad alta
+
+Funciones que un negocio real pediría el primer día.
+
+- [ ] **Recuperar contraseña.** Hoy no hay forma de restablecerla. Agregar las rutas de `Password::sendResetLink()` y `Password::reset()` con sus vistas, siguiendo `LoginController`.
+- [ ] **Reprogramar una cita.** Hoy hay que cancelar y volver a reservar.
+  - Agregar `AppointmentBooker::reschedule()`, con el mismo bloqueo y la misma verificación que `book()`.
+  - Usarlo desde el enlace del cliente y desde el panel de la cita en la agenda.
+- [ ] **Crear citas desde el panel**, para reservas por teléfono o clientes que llegan sin cita. Reutilizar `AvailabilityService` y `AppointmentBooker::book()` desde la agenda: clic en un hueco libre del calendario → formulario corto.
+- [ ] **Correos con la marca del negocio.** Los correos usan la plantilla estándar de Laravel. Publicarla (`php artisan vendor:publish --tag=laravel-mail`) y darle los colores y el logo de ReservaPro.
+
+## Prioridad media
+
+Funciones que hacen crecer el producto.
+
+- [ ] **Varios empleados por negocio**, cada uno con su agenda.
+  - Agregar el modelo `StaffMember`, y que horarios y citas pertenezcan a un empleado.
+  - `AvailabilityService` calcularía la disponibilidad por empleado.
+  - En la reserva se elegiría "cualquiera" o una persona concreta.
+- [ ] **Logo y foto de portada del negocio.** Hoy se usan las iniciales y un degradado. Subirlos desde Ajustes con `Storage` y mostrarlos en `booking-wizard.blade.php`.
+- [ ] **Pagos en línea o anticipo al reservar** (Stripe o Mercado Pago). La cita quedaría "por confirmar" hasta recibir el pago.
+- [ ] **Recordatorios por WhatsApp o SMS.** Agregar un canal más a `AppointmentReminder`, que hoy solo envía correo, para que el cliente elija cómo recibirlos.
+- [ ] **Reportes.** Exportar las citas a CSV e ingresos por mes y por servicio en una pantalla nueva del panel.
+- [ ] **Mover citas arrastrándolas en la agenda.** Requiere la reprogramación de arriba.
+
+## Prioridad baja
+
+Detalles que mejoran la experiencia.
+
+- [ ] **Modo oscuro**, con variantes `dark:` de Tailwind y la paleta `slate` que ya se usa.
+- [ ] **Interfaz en inglés.** Hoy los textos están escritos en las vistas. Moverlos a `lang/es` y `lang/en` con `__()`.
+- [ ] **Lista de espera** cuando un día está lleno: avisar por correo si se libera un horario.
+- [ ] **Reseñas** después de una cita atendida, visibles en la página del negocio.
+- [ ] **Instalar como app (PWA)** con un manifiesto e iconos, para que el dueño abra la agenda desde la pantalla de inicio del celular.
+
+## Técnico
+
+- [ ] **Pruebas de navegador** para lo que PHPUnit no ve: toasts, ventana de confirmación, barra inferior del celular y panel lateral. Puede ser con Laravel Dusk o Playwright.
+- [ ] **Datos persistentes en la demo.** El plan gratis de Render borra la base SQLite cuando el servicio se duerme. Una base PostgreSQL gratuita la conservaría.
+- [ ] **Borrar cuenta y datos personales** desde el perfil del cliente, por privacidad.
+- [ ] **Medir y optimizar** la disponibilidad si un negocio tiene miles de citas. Ya hay índices en `appointments (business_id, starts_at)`; el siguiente paso sería guardar en caché los horarios libres de cada día.
