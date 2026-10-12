@@ -40,7 +40,7 @@ Cuando el negocio agenda o mueve una cita desde la agenda:
 
 - No aplica la anticipación mínima (solo se ocultan las horas que ya pasaron), para atender a quien llega sin cita.
 - Las citas que agenda nacen confirmadas aunque esté encendido "Confirmar cada cita manualmente".
-- El correo del cliente es opcional. Sin correo, no se envía confirmación, recordatorio ni avisos.
+- El correo del cliente es opcional. Sin correo ni WhatsApp, no se envía confirmación, recordatorio ni avisos.
 - Al dueño no le llega el aviso de "nueva cita", porque la creó él.
 
 Al cambiar el horario de una cita:
@@ -60,7 +60,7 @@ Al cambiar el horario de una cita:
 | Confirmar cada cita manualmente | Apagado | Si se enciende, las reservas nacen "por confirmar". |
 | Zona horaria | Ciudad de México | Todas las horas del negocio se interpretan en esta zona. |
 
-## Correos
+## Correos y WhatsApp
 
 | Cuándo | Para quién | Contenido |
 |--------|-----------|-----------|
@@ -75,6 +75,13 @@ Al cambiar el horario de una cita:
 | 24 h antes (citas confirmadas) | Cliente | Recordatorio con dirección y enlace. No se envía a quien reservó hace menos de 2 horas. |
 
 Los correos se mandan por la cola, así que reservar no espera al servidor de correo. En la demo se escriben en el log (`MAIL_MAILER=log`).
+
+Si el cliente marcó **Recibir los avisos también por WhatsApp**, los mensajes que van al cliente (confirmación o solicitud, confirmación del negocio, recordatorio, cambio de horario y cancelación) le llegan también por WhatsApp. Los avisos al dueño siguen siendo solo por correo.
+
+- El celular se guarda como lo escribió el cliente y se convierte a formato internacional al enviar: 10 dígitos se toman como de México (+52); con `+` o `00` al inicio se respeta el país.
+- Si marcó la casilla con un número que no se puede convertir, la reserva no se crea y se le pide corregirlo.
+- El recordatorio también se envía a quien solo dejó su WhatsApp (citas creadas desde el panel sin correo).
+- Sin las credenciales de Meta (ver [despliegue](despliegue.md#whatsapp)), los mensajes se escriben en el log, como los correos de la demo.
 
 ## Página pública
 

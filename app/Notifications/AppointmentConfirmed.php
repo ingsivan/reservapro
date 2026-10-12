@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\Models\Appointment;
 use App\Models\StaffMember;
+use App\Notifications\Concerns\ReachesCustomers;
+use App\Notifications\Messages\WhatsAppMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,17 +13,9 @@ use Illuminate\Notifications\Notification;
 
 class AppointmentConfirmed extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ReachesCustomers;
 
     public function __construct(public Appointment $appointment) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
-    }
 
     public function toMail(object $notifiable): MailMessage
     {
@@ -36,5 +30,18 @@ class AppointmentConfirmed extends Notification implements ShouldQueue
             ->when($appointment->staffMember, fn (MailMessage $message, StaffMember $staffMember) => $message->line("**Te atiende:** {$staffMember->name}"))
             ->line("**Fecha:** {$appointment->whenLabel()}")
             ->action('Ver mi cita', $appointment->manageUrl());
+    }
+
+    public function toWhatsApp(object $notifiable): WhatsAppMessage
+    {
+        $appointment = $this->appointment;
+
+        return WhatsAppMessage::template('cita_confirmada', [
+            $appointment->customer_name,
+            $appointment->business->name,
+            $appointment->serviceLabel(),
+            $appointment->whenLabel(),
+            $appointment->manageUrl(),
+        ]);
     }
 }

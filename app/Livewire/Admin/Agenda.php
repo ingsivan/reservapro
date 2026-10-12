@@ -380,7 +380,12 @@ class Agenda extends Component
      */
     private function customerNotice(Appointment $appointment): string
     {
-        return $appointment->customer_email ? ' Le avisamos al cliente por correo.' : '';
+        return match (true) {
+            $appointment->customer_email !== null && $appointment->whatsappNumber() !== null => ' Le avisamos al cliente por correo y WhatsApp.',
+            $appointment->customer_email !== null => ' Le avisamos al cliente por correo.',
+            $appointment->whatsappNumber() !== null => ' Le avisamos al cliente por WhatsApp.',
+            default => '',
+        };
     }
 
     private function markPast(int $appointmentId, AppointmentStatus $status): void

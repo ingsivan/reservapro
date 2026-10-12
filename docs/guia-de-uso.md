@@ -19,7 +19,7 @@ No hace falta crear una cuenta.
    - Si el negocio tiene equipo, arriba eliges **con quién**: una persona o "Quien esté libre" (ves más horarios).
    - Los días muestran cuántos horarios libres quedan. Usa las flechas para ver más días.
    - Las horas se agrupan en mañana, tarde y noche. Elige una.
-4. **Tus datos:** escribe tu nombre y correo (teléfono y notas son opcionales) y pulsa **Confirmar reserva**. En el celular, el botón está en la barra inferior.
+4. **Tus datos:** escribe tu nombre y correo (celular y notas son opcionales) y pulsa **Confirmar reserva**. Si marcas **Recibir los avisos también por WhatsApp**, escribe tu celular a 10 dígitos: la confirmación, el recordatorio y cualquier cambio te llegarán también por WhatsApp. En el celular, el botón está en la barra inferior.
 5. Verás tu código de cita y llegará un correo con los detalles.
 
 Si la reserva dice "Solicitud enviada", el negocio confirma cada cita a mano: te llegará otro correo cuando la apruebe.
@@ -66,12 +66,12 @@ Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis 
 - **Filtros:** muestra solo las citas de un estado (por confirmar, confirmadas, atendidas…) o, con equipo, de una persona.
 - **Con equipo:** cada cita lleva el color de quien atiende, y las citas a la misma hora se ven lado a lado.
 - **Calendario:** cada bloque es una cita. La línea roja marca la hora actual. Usa las flechas para cambiar de semana y **Hoy** para regresar.
-- **Clic en una cita:** abre un panel con el cliente, su correo y teléfono (con enlace para escribir o llamar), la nota que dejó y el historial de la cita.
+- **Clic en una cita:** abre un panel con el cliente, su correo y teléfono (con enlaces para escribirle, llamarle o abrir el chat de WhatsApp; ahí también dice si pidió los avisos por WhatsApp), la nota que dejó y el historial de la cita.
 - **Acciones:**
   - Antes de la cita: **Confirmar** (si está por confirmar), **Reprogramar** o **Cancelar**.
   - **Reprogramar** muestra los días y horas libres en el mismo panel. Elige uno y pulsa **Guardar**: la agenda salta a ese día.
   - Después de la hora de inicio: **Atendida** o **No asistió**.
-  - Al confirmar, reprogramar o cancelar, el cliente recibe un correo.
+  - Al confirmar, reprogramar o cancelar, el cliente recibe un correo (y un WhatsApp, si lo pidió).
 - En el celular, toca un día de la fila superior para ver sus citas.
 
 ### Agendar una cita por teléfono o sin cita
@@ -81,7 +81,7 @@ Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis 
 3. Escribe el nombre del cliente. Teléfono, correo y notas son opcionales.
 4. Pulsa **Crear cita**. Queda confirmada y la agenda salta a ese día.
 
-Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el enlace para cambiar o cancelar. Si no, avísale tú por teléfono de cualquier cambio.
+Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el enlace para cambiar o cancelar. Si marcas **Enviarle los avisos por WhatsApp** (con su celular a 10 dígitos), le llegan también por WhatsApp. Sin ninguno de los dos, avísale tú por teléfono de cualquier cambio.
 
 ### Servicios
 

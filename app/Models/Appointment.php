@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
 use App\Support\Money;
+use App\Support\PhoneNumber;
 use Carbon\CarbonImmutable;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -12,8 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Notification as Notifier;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
  */
 #[Fillable([
     'code', 'business_id', 'service_id', 'staff_member_id', 'user_id', 'customer_name', 'customer_email',
-    'customer_phone', 'notes', 'starts_at', 'ends_at', 'status', 'price_cents',
+    'customer_phone', 'whatsapp_opt_in', 'notes', 'starts_at', 'ends_at', 'status', 'price_cents',
     'confirmed_at', 'cancelled_at', 'cancelled_by', 'reminder_sent_at',
 ])]
 class Appointment extends Model
@@ -49,6 +50,7 @@ class Appointment extends Model
             'status' => AppointmentStatus::class,
             'cancelled_by' => CancelledBy::class,
             'price_cents' => 'integer',
+            'whatsapp_opt_in' => 'boolean',
         ];
     }
 
@@ -94,13 +96,50 @@ class Appointment extends Model
 
     /**
      * Email the customer, if the appointment has an email (the business may
-     * book by phone without one).
+     * book by phone without one), and send WhatsApp if they asked for it.
      */
     public function notifyCustomer(Notification $notification): void
     {
-        if ($this->customer_email) {
-            Notifier::route('mail', [$this->customer_email => $this->customer_name])->notify($notification);
+        $routes = array_filter([
+            'mail' => $this->customer_email ? [$this->customer_email => $this->customer_name] : null,
+            'whatsapp' => $this->whatsappNumber(),
+        ]);
+
+        if ($routes === []) {
+            return;
         }
+
+        $notifiable = new AnonymousNotifiable;
+
+        foreach ($routes as $channel => $route) {
+            $notifiable->route($channel, $route);
+        }
+
+        $notifiable->notify($notification);
+    }
+
+    /**
+     * The customer's number in international format, when they want WhatsApp messages.
+     */
+    public function whatsappNumber(): ?string
+    {
+        return $this->whatsapp_opt_in ? PhoneNumber::toE164($this->customer_phone) : null;
+    }
+
+    /**
+     * Whether the customer gets any message from us (email or WhatsApp).
+     */
+    public function canBeNotified(): bool
+    {
+        return $this->customer_email !== null || $this->whatsappNumber() !== null;
+    }
+
+    /**
+     * What and with whom, for short messages: "Corte de cabello con Diego Ramírez".
+     */
+    public function serviceLabel(): string
+    {
+        return $this->service->name.($this->staffMember ? " con {$this->staffMember->name}" : '');
     }
 
     public function localStartsAt(): CarbonImmutable

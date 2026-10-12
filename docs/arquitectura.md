@@ -126,7 +126,11 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 | `App\Services\BusinessReport` | Ingresos y citas de los últimos meses, por mes y por servicio, contados en la zona horaria del negocio. |
 | `App\Livewire\Admin\Reports` | Pantalla de reportes con la gráfica y el cambio de periodo. |
 | `App\Http\Controllers\Admin\ExportAppointmentsController` | Descarga en CSV (UTF-8 con BOM, para que Excel lea los acentos) de las citas del periodo. |
-| `App\Console\Commands\SendAppointmentReminders` | Recordatorio por correo 24 horas antes (cada 15 minutos con el Scheduler). |
+| `App\Console\Commands\SendAppointmentReminders` | Recordatorio por correo y WhatsApp 24 horas antes (cada 15 minutos con el Scheduler). |
+| `App\Notifications\Channels\WhatsAppChannel` | Canal de notificaciones propio: manda la plantilla a la API de WhatsApp Cloud con el cliente HTTP de Laravel, o la escribe en el log si no hay credenciales. |
+| `App\Notifications\Messages\WhatsAppMessage` | Nombre de la plantilla y sus parámetros; `TEMPLATES` guarda el texto de cada una para el log y para darlas de alta en Meta. |
+| `App\Notifications\Concerns\ReachesCustomers` | `via()` compartido de los avisos al cliente: correo si hay correo, WhatsApp si lo pidió. `Appointment::notifyCustomer()` arma las rutas. |
+| `App\Support\PhoneNumber` | Convierte el celular a formato E.164 (+52 por defecto) y arma el enlace `wa.me`. |
 
 ## Pruebas
 

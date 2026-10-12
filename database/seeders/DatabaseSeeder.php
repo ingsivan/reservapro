@@ -188,6 +188,7 @@ class DatabaseSeeder extends Seeder
             'customer_name' => $name,
             'customer_email' => $client?->email ?? str($name)->ascii()->lower()->replace(' ', '.')->append('@example.com')->toString(),
             'customer_phone' => '55 '.random_int(1000, 9999).' '.random_int(1000, 9999),
+            'whatsapp_opt_in' => random_int(1, 3) === 1,
             'notes' => random_int(1, 8) === 1 ? 'Prefiero que me atienda el mismo barbero de la última vez.' : null,
             'starts_at' => $start->utc(),
             'ends_at' => $start->addMinutes($service->duration_minutes)->utc(),

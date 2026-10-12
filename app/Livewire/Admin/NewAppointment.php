@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\StaffMember;
 use App\Services\AppointmentBooker;
 use App\Services\AvailabilityService;
+use App\Support\PhoneNumber;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -46,6 +47,9 @@ class NewAppointment extends Component
     #[Validate('nullable|string|max:40')]
     public string $customerPhone = '';
 
+    /** Also send the confirmation, reminder and changes by WhatsApp. */
+    public bool $whatsappReminders = false;
+
     #[Validate('nullable|email|max:255')]
     public string $customerEmail = '';
 
@@ -58,7 +62,7 @@ class NewAppointment extends Component
     #[On('new-appointment')]
     public function start(?string $date = null): void
     {
-        $this->reset('serviceId', 'staffMemberId', 'date', 'startsAt', 'customerName', 'customerPhone', 'customerEmail', 'notes');
+        $this->reset('serviceId', 'staffMemberId', 'date', 'startsAt', 'customerName', 'customerPhone', 'whatsappReminders', 'customerEmail', 'notes');
         $this->resetValidation();
         $this->open = true;
         $this->selectService($this->services->first()?->id ?? 0, $date);
@@ -112,6 +116,12 @@ class NewAppointment extends Component
     public function save(AppointmentBooker $booker): void
     {
         $this->validate();
+
+        if ($this->whatsappReminders && PhoneNumber::toE164($this->customerPhone) === null) {
+            $this->addError('customerPhone', 'Escribe el celular a 10 dígitos para enviar los avisos por WhatsApp.');
+
+            return;
+        }
         $service = $this->selectedService;
 
         if ($service === null) {
@@ -125,6 +135,7 @@ class NewAppointment extends Component
                 'customer_name' => $this->customerName,
                 'customer_email' => $this->customerEmail ?: null,
                 'customer_phone' => $this->customerPhone ?: null,
+                'whatsapp_opt_in' => $this->whatsappReminders,
                 'notes' => $this->notes ?: null,
             ], byBusiness: true, staffMember: $this->selectedStaffMember);
         } catch (SlotUnavailableException $exception) {
@@ -138,7 +149,7 @@ class NewAppointment extends Component
         $this->open = false;
         $this->dispatch('appointment-created', date: $appointment->localStartsAt()->toDateString());
         $with = $appointment->staffMember ? " con {$appointment->staffMember->firstName()}" : '';
-        $this->notify($appointment->customer_email
+        $this->notify($appointment->canBeNotified()
             ? "Cita creada{$with}. Le enviamos la confirmación al cliente."
             : "Cita creada{$with}.");
     }

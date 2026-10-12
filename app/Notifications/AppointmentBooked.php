@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\StaffMember;
+use App\Notifications\Concerns\ReachesCustomers;
+use App\Notifications\Messages\WhatsAppMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,17 +14,9 @@ use Illuminate\Notifications\Notification;
 
 class AppointmentBooked extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ReachesCustomers;
 
     public function __construct(public Appointment $appointment) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
-    }
 
     public function toMail(object $notifiable): MailMessage
     {
@@ -44,5 +38,18 @@ class AppointmentBooked extends Notification implements ShouldQueue
             ->line("**Código:** {$appointment->code}")
             ->action('Ver, cambiar o cancelar mi cita', $appointment->manageUrl())
             ->line("Si no puedes asistir, cambia el horario o cancela con al menos {$appointment->business->cancellation_notice_hours} horas de anticipación.");
+    }
+
+    public function toWhatsApp(object $notifiable): WhatsAppMessage
+    {
+        $appointment = $this->appointment;
+
+        return WhatsAppMessage::template($appointment->status === AppointmentStatus::Pending ? 'cita_solicitada' : 'cita_confirmada', [
+            $appointment->customer_name,
+            $appointment->business->name,
+            $appointment->serviceLabel(),
+            $appointment->whenLabel(),
+            $appointment->manageUrl(),
+        ]);
     }
 }

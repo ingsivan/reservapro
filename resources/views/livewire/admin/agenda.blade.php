@@ -308,7 +308,7 @@
                                 @if ($appointment->customer_email)
                                     <dd><a href="mailto:{{ $appointment->customer_email }}" class="break-all font-medium text-teal-700 hover:underline">{{ $appointment->customer_email }}</a></dd>
                                 @else
-                                    <dd class="text-slate-500">Sin correo: avísale por teléfono si cambias o cancelas la cita.</dd>
+                                    <dd class="text-slate-500">{{ $appointment->whatsappNumber() ? 'Sin correo: le avisamos por WhatsApp si cambias o cancelas la cita.' : 'Sin correo: avísale por teléfono si cambias o cancelas la cita.' }}</dd>
                                 @endif
                             </div>
                         </div>
@@ -318,6 +318,14 @@
                                 <div>
                                     <dt class="sr-only">Teléfono</dt>
                                     <dd><a href="tel:{{ preg_replace('/[^\d+]/', '', $appointment->customer_phone) }}" class="font-medium text-teal-700 hover:underline">{{ $appointment->customer_phone }}</a></dd>
+                                    @if ($whatsappUrl = \App\Support\PhoneNumber::whatsappUrl($appointment->customer_phone))
+                                        <dd class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                            <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-medium text-emerald-700 hover:underline"><x-icon name="message" class="size-4" /> Escribir por WhatsApp</a>
+                                            @if ($appointment->whatsapp_opt_in)
+                                                <span class="text-xs text-slate-500">Recibe los avisos por WhatsApp</span>
+                                            @endif
+                                        </dd>
+                                    @endif
                                 </div>
                             </div>
                         @endif
