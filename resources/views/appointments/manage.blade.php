@@ -8,7 +8,7 @@
 <x-layouts::app title="Tu cita">
     <div class="mx-auto max-w-xl">
         <a href="{{ route('booking', $business) }}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-teal-700">
-            <span class="flex size-7 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white">{{ $business->initials() }}</span>
+            <x-business-avatar :business="$business" class="size-7 rounded-lg text-xs" />
             {{ $business->name }}
         </a>
         <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">Tu cita</h1>

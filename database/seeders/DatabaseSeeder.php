@@ -10,6 +10,8 @@ use App\Models\Service;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Demo business with services, opening hours and two weeks of appointments
@@ -91,6 +93,11 @@ class DatabaseSeeder extends Seeder
         $business->blockedDates()->create([
             'date' => $business->now()->addDays(12)->toDateString(),
             'reason' => 'Capacitación del equipo',
+        ]);
+
+        $business->update([
+            'logo_path' => Storage::disk('public')->putFile("businesses/{$business->id}", new File(__DIR__.'/images/logo.png')),
+            'cover_path' => Storage::disk('public')->putFile("businesses/{$business->id}", new File(__DIR__.'/images/cover.jpg')),
         ]);
 
         $this->seedAppointments($business, $client);

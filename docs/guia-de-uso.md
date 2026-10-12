@@ -94,6 +94,8 @@ Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el 
 
 ### Ajustes
 
+**Imagen de tu página:** sube tu logo (cuadrado, de al menos 96 px) y una foto de portada (horizontal, de al menos 800 × 200 px) en JPG, PNG o WebP. Se guardan al elegirlas y se ven en tu página de reservas y en el menú del panel. Si no subes logo, se muestran tus iniciales.
+
 | Ajuste | Qué hace |
 |--------|----------|
 | Dirección de tu página | La parte final del enlace: `/reservar/mi-negocio`. |

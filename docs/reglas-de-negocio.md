@@ -80,6 +80,7 @@ Los correos se mandan por la cola, así que reservar no espera al servidor de co
 
 - El aviso de la portada dice "Abierto · cierra a las HH:MM" si la hora actual del negocio cae dentro de una ventana de horario (también la de un turno de ayer que cruzó la medianoche). Si no, dice cuándo vuelve a abrir: hoy, mañana o el día de la semana, saltando los días bloqueados. Si no abre en la próxima semana, solo dice "Cerrado".
 - El horario agrupa los días seguidos con las mismas horas ("Lun – Vie").
+- Si el negocio subió logo y portada, se muestran arriba; si no, sus iniciales sobre un cuadro oscuro y un degradado turquesa.
 - En el selector de días, un día sin horarios libres dice "Cerrado" si el negocio no abre ese día de la semana, o "Sin lugar" si ya se llenó o está bloqueado.
 - Los botones de calendario usan las horas en UTC, así que el evento aparece a la hora correcta en cualquier zona horaria. El archivo `.ics` va firmado como el resto de los enlaces de la cita.
 

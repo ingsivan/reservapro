@@ -5,16 +5,19 @@ namespace App\Livewire\Admin;
 use App\Livewire\Concerns\ManagesBusiness;
 use App\Livewire\Concerns\ShowsNotices;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts::admin')]
 #[Title('Ajustes')]
 class BusinessSettings extends Component
 {
-    use ManagesBusiness, ShowsNotices;
+    use ManagesBusiness, ShowsNotices, WithFileUploads;
 
     /** Time zones offered in the form; any valid PHP time zone is accepted. */
     public const TIMEZONES = [
@@ -54,6 +57,12 @@ class BusinessSettings extends Component
     public int|string $cancellationNoticeHours = 2;
 
     public bool $requiresConfirmation = false;
+
+    /** New logo, saved as soon as it is uploaded. */
+    public ?UploadedFile $logo = null;
+
+    /** New cover photo, saved as soon as it is uploaded. */
+    public ?UploadedFile $cover = null;
 
     public function mount(): void
     {
@@ -118,8 +127,61 @@ class BusinessSettings extends Component
         $this->notify('Ajustes guardados.');
     }
 
+    public function updatedLogo(): void
+    {
+        $this->validate(
+            ['logo' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:min_width=96,min_height=96']],
+            attributes: ['logo' => 'logo'],
+        );
+
+        $this->replaceImage('logo_path', $this->logo);
+        $this->reset('logo');
+        $this->notify('Logo actualizado.');
+    }
+
+    public function updatedCover(): void
+    {
+        $this->validate(
+            ['cover' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=800,min_height=200']],
+            attributes: ['cover' => 'foto de portada'],
+        );
+
+        $this->replaceImage('cover_path', $this->cover);
+        $this->reset('cover');
+        $this->notify('Foto de portada actualizada.');
+    }
+
+    public function removeLogo(): void
+    {
+        $this->replaceImage('logo_path', null);
+        $this->notify('Quitamos el logo. Tu página muestra tus iniciales.');
+    }
+
+    public function removeCover(): void
+    {
+        $this->replaceImage('cover_path', null);
+        $this->notify('Quitamos la foto de portada.');
+    }
+
     public function render(): View
     {
         return view('livewire.admin.business-settings');
+    }
+
+    /**
+     * Store the new image on the public disk (or none) and delete the old file.
+     */
+    private function replaceImage(string $column, ?UploadedFile $file): void
+    {
+        $business = $this->business;
+        $previousPath = $business->{$column};
+
+        $business->update([$column => $file?->store("businesses/{$business->id}", 'public')]);
+
+        if ($previousPath) {
+            Storage::disk('public')->delete($previousPath);
+        }
+
+        unset($this->business);
     }
 }

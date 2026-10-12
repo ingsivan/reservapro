@@ -14,3 +14,5 @@ database/database.sqlite
 .env.*
 !.env.example
 docs/screenshots
+public/storage
+storage/app/public/*

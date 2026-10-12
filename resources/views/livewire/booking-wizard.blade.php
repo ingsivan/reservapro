@@ -13,13 +13,15 @@
 <div>
     {{-- Business header --}}
     <header class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="relative h-24 bg-linear-to-br from-teal-700 via-teal-500 to-emerald-400 sm:h-32">
-            <div class="bg-dots absolute inset-0"></div>
-        </div>
-        <div class="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:gap-5 sm:px-6">
-            <div class="relative -mt-10 flex size-20 shrink-0 self-start items-center justify-center rounded-2xl border-4 border-white bg-slate-900 text-2xl font-bold text-white shadow-md sm:-mt-12 sm:size-24 sm:text-3xl">
-                {{ $business->initials() }}
+        @if ($coverUrl = $business->coverUrl())
+            <img src="{{ $coverUrl }}" alt="" class="h-32 w-full object-cover sm:h-48">
+        @else
+            <div class="relative h-24 bg-linear-to-br from-teal-700 via-teal-500 to-emerald-400 sm:h-32">
+                <div class="bg-dots absolute inset-0"></div>
             </div>
+        @endif
+        <div class="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:gap-5 sm:px-6">
+            <x-business-avatar :business="$business" class="relative -mt-10 size-20 shrink-0 self-start rounded-2xl border-4 border-white text-2xl shadow-md sm:-mt-12 sm:size-24 sm:text-3xl" />
             <div class="min-w-0 flex-1 sm:pt-4">
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $business->name }}</h1>
                 @if ($business->description)

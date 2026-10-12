@@ -15,6 +15,7 @@ Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué re
 - [x] Reprogramar una cita desde el enlace del cliente y desde el panel de la cita en la agenda
 - [x] Crear citas desde el panel, con correo opcional
 - [x] Correos con la marca de ReservaPro y todos los textos en español
+- [x] Logo y foto de portada del negocio, subidos desde Ajustes
 
 ## Prioridad alta
 
@@ -30,7 +31,6 @@ Funciones que hacen crecer el producto.
   - Agregar el modelo `StaffMember`, y que horarios y citas pertenezcan a un empleado.
   - `AvailabilityService` calcularía la disponibilidad por empleado.
   - En la reserva se elegiría "cualquiera" o una persona concreta.
-- [ ] **Logo y foto de portada del negocio.** Hoy se usan las iniciales y un degradado. Subirlos desde Ajustes con `Storage` y mostrarlos en `booking-wizard.blade.php`.
 - [ ] **Pagos en línea o anticipo al reservar** (Stripe o Mercado Pago). La cita quedaría "por confirmar" hasta recibir el pago.
 - [ ] **Recordatorios por WhatsApp o SMS.** Agregar un canal más a `AppointmentReminder`, que hoy solo envía correo, para que el cliente elija cómo recibirlos.
 - [ ] **Reportes.** Exportar las citas a CSV e ingresos por mes y por servicio en una pantalla nueva del panel.

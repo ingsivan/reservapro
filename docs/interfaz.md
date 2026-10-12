@@ -37,6 +37,7 @@ Están en `resources/views/components`.
 | `x-time-picker` | Fila de días con sus horarios libres y las horas del día elegido, agrupadas en mañana, tarde y noche. Llama a los métodos de Livewire `select-date` y `select-slot`. Se usa en la reserva, al cambiar el horario y en el panel de la cita. | `<x-time-picker :business="$business" :availability="$this->availability" :date="$date" :selected="$startsAt" />` |
 | `x-admin.appointment-actions` | Botones según el estado de la cita: confirmar, reprogramar, cancelar, atendida o no asistió. | `<x-admin.appointment-actions :appointment="$appointment" />` |
 | `x-logo` | Logo de ReservaPro. | — |
+| `x-business-avatar` | Logo del negocio, o sus iniciales sobre un cuadro oscuro si no tiene. El tamaño y la forma van en `class`. | `<x-business-avatar :business="$business" class="size-9 rounded-lg" />` |
 
 Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
 
@@ -105,7 +106,7 @@ stateDiagram-v2
   - El filtro queda en la URL (`?estado=pending`).
 - **Servicios:** tarjetas con un interruptor Visible / Oculto; el formulario se abre en una ventana.
 - **Horario:** ventanas por día con una barra que las dibuja sobre las 24 horas.
-- **Ajustes:** tarjeta con el enlace público y los datos del negocio.
+- **Ajustes:** tarjeta con el enlace público, vista previa de la portada y el logo (cada imagen se guarda al elegirla) y los datos del negocio.
 
 ### Cliente
 

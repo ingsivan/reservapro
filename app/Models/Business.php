@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'user_id', 'name', 'slug', 'description', 'address', 'phone', 'timezone',
+    'user_id', 'name', 'slug', 'description', 'address', 'phone', 'logo_path', 'cover_path', 'timezone',
     'slot_interval_minutes', 'min_notice_minutes', 'booking_window_days',
     'cancellation_notice_hours', 'requires_confirmation',
 ])]
@@ -67,6 +67,23 @@ class Business extends Model
     public function now(): CarbonImmutable
     {
         return CarbonImmutable::now($this->timezone);
+    }
+
+    /**
+     * Public URL of the uploaded logo, if any. Relative to the current host,
+     * so it works even when APP_URL doesn't match the domain.
+     */
+    public function logoUrl(): ?string
+    {
+        return $this->logo_path ? asset('storage/'.$this->logo_path) : null;
+    }
+
+    /**
+     * Public URL of the uploaded cover photo, if any.
+     */
+    public function coverUrl(): ?string
+    {
+        return $this->cover_path ? asset('storage/'.$this->cover_path) : null;
     }
 
     /**
