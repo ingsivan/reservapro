@@ -16,7 +16,6 @@ use App\Notifications\AppointmentRescheduled;
 use App\Notifications\NewAppointmentForBusiness;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 
 /**
  * Creates, confirms, moves and cancels appointments, and sends the matching emails.
@@ -33,21 +32,25 @@ class AppointmentBooker
      * one sees the first appointment and gets a SlotUnavailableException.
      * On SQLite, the connection uses IMMEDIATE transactions for the same effect.
      *
-     * @param  array{customer_name: string, customer_email: string, customer_phone?: ?string, notes?: ?string}  $customer
+     * With $byBusiness (a phone booking or a walk-in), the appointment is
+     * confirmed right away, the minimum notice doesn't apply, the email is
+     * optional and the owner isn't emailed about their own booking.
+     *
+     * @param  array{customer_name: string, customer_email: ?string, customer_phone?: ?string, notes?: ?string}  $customer
      *
      * @throws SlotUnavailableException
      */
-    public function book(Service $service, CarbonImmutable $startsAt, array $customer, ?User $user = null): Appointment
+    public function book(Service $service, CarbonImmutable $startsAt, array $customer, ?User $user = null, bool $byBusiness = false): Appointment
     {
-        $appointment = DB::transaction(function () use ($service, $startsAt, $customer, $user) {
+        $appointment = DB::transaction(function () use ($service, $startsAt, $customer, $user, $byBusiness) {
             $business = Business::whereKey($service->business_id)->lockForUpdate()->firstOrFail();
             $service->setRelation('business', $business);
 
-            if (! $service->is_active || ! $this->availability->isAvailable($service, $startsAt)) {
+            if (! $service->is_active || ! $this->availability->isAvailable($service, $startsAt, forBusiness: $byBusiness)) {
                 throw new SlotUnavailableException;
             }
 
-            $status = $business->requires_confirmation ? AppointmentStatus::Pending : AppointmentStatus::Confirmed;
+            $status = $business->requires_confirmation && ! $byBusiness ? AppointmentStatus::Pending : AppointmentStatus::Confirmed;
 
             return $business->appointments()->create([
                 'service_id' => $service->id,
@@ -66,9 +69,11 @@ class AppointmentBooker
 
         $appointment->load('business.owner', 'service');
 
-        Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
-            ->notify(new AppointmentBooked($appointment));
-        $appointment->business->owner->notify(new NewAppointmentForBusiness($appointment));
+        $appointment->notifyCustomer(new AppointmentBooked($appointment));
+
+        if (! $byBusiness) {
+            $appointment->business->owner->notify(new NewAppointmentForBusiness($appointment));
+        }
 
         return $appointment;
     }
@@ -84,8 +89,7 @@ class AppointmentBooker
             'confirmed_at' => now(),
         ]);
 
-        Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
-            ->notify(new AppointmentConfirmed($appointment));
+        $appointment->notifyCustomer(new AppointmentConfirmed($appointment));
     }
 
     /**
@@ -101,12 +105,12 @@ class AppointmentBooker
     {
         $previousWhen = $appointment->whenLabel();
 
-        DB::transaction(function () use ($appointment, $startsAt) {
+        DB::transaction(function () use ($appointment, $startsAt, $changedBy) {
             $business = Business::whereKey($appointment->business_id)->lockForUpdate()->firstOrFail();
             $appointment->refresh()->setRelation('business', $business);
             $service = $appointment->service->setRelation('business', $business);
 
-            if (! $appointment->status->isActive() || ! $this->availability->isAvailable($service, $startsAt, $appointment)) {
+            if (! $appointment->status->isActive() || ! $this->availability->isAvailable($service, $startsAt, $appointment, $changedBy === CancelledBy::Business)) {
                 throw new SlotUnavailableException;
             }
 
@@ -121,7 +125,7 @@ class AppointmentBooker
         $notification = new AppointmentRescheduled($appointment, $previousWhen);
 
         if ($changedBy === CancelledBy::Business) {
-            Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])->notify($notification);
+            $appointment->notifyCustomer($notification);
         } else {
             $appointment->business->owner->notify($notification);
         }
@@ -145,8 +149,7 @@ class AppointmentBooker
         ]);
 
         if ($cancelledBy === CancelledBy::Business) {
-            Notification::route('mail', [$appointment->customer_email => $appointment->customer_name])
-                ->notify(new AppointmentCancelled($appointment));
+            $appointment->notifyCustomer(new AppointmentCancelled($appointment));
         } else {
             $appointment->business->owner->notify(new AppointmentCancelled($appointment));
         }

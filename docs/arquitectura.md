@@ -95,6 +95,7 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 | `App\Services\BusinessSetup` | Crea un negocio nuevo con `slug` único y un horario de ejemplo. |
 | `App\Livewire\BookingWizard` | Página pública de reserva en tres pasos. |
 | `App\Livewire\Admin\Agenda` | Calendario semanal, lista del día, estadísticas y acciones sobre las citas. |
+| `App\Livewire\Admin\NewAppointment` | Panel para agendar una cita por teléfono o sin cita, dentro de la agenda. Avisa con el evento `appointment-created` para que la agenda salte a ese día. |
 | `App\Livewire\Admin\Services`, `ScheduleManager`, `BusinessSettings` | Catálogo, horario semanal y días cerrados, y ajustes del negocio. |
 | `App\Livewire\MyAppointments` | Citas del cliente con cuenta. |
 | `App\Livewire\RescheduleAppointment` | Cambiar el horario desde el enlace firmado del correo. |

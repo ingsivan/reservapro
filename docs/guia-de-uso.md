@@ -71,6 +71,15 @@ Si te registras como cliente, tus datos se llenan solos al reservar, y en **Mis 
   - Al confirmar, reprogramar o cancelar, el cliente recibe un correo.
 - En el celular, toca un día de la fila superior para ver sus citas.
 
+### Agendar una cita por teléfono o sin cita
+
+1. En la agenda, pulsa **Nueva cita** (o **Agendar en este día** si el día está vacío).
+2. Elige el servicio, el día y la hora. Aquí no aplica la anticipación mínima, así que puedes agendar a alguien que acaba de llegar.
+3. Escribe el nombre del cliente. Teléfono, correo y notas son opcionales.
+4. Pulsa **Crear cita**. Queda confirmada y la agenda salta a ese día.
+
+Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el enlace para cambiar o cancelar. Si no, avísale tú por teléfono de cualquier cambio.
+
 ### Servicios
 
 - **Nuevo servicio** abre una ventana con nombre, duración, precio y descripción.

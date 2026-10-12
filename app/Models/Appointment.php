@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Notification as Notifier;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
@@ -83,6 +85,17 @@ class Appointment extends Model
     public function scopeOverlapping(Builder $query, CarbonImmutable $start, CarbonImmutable $end): void
     {
         $query->where('starts_at', '<', $end->utc())->where('ends_at', '>', $start->utc());
+    }
+
+    /**
+     * Email the customer, if the appointment has an email (the business may
+     * book by phone without one).
+     */
+    public function notifyCustomer(Notification $notification): void
+    {
+        if ($this->customer_email) {
+            Notifier::route('mail', [$this->customer_email => $this->customer_name])->notify($notification);
+        }
     }
 
     public function localStartsAt(): CarbonImmutable
