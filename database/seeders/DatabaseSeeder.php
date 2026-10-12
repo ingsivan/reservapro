@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\File;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -100,11 +101,12 @@ class DatabaseSeeder extends Seeder
             'cover_path' => Storage::disk('public')->putFile("businesses/{$business->id}", new File(__DIR__.'/images/cover.jpg')),
         ]);
 
-        $this->seedAppointments($business, $client);
+        DB::transaction(fn () => $this->seedAppointments($business, $client));
     }
 
     /**
-     * Fill about half of the slots from a week ago to ten days ahead.
+     * Fill the slots from eleven months ago to ten days ahead. Older months
+     * are quieter, so the reports show a business that is growing.
      */
     private function seedAppointments(Business $business, User $client): void
     {
@@ -113,8 +115,15 @@ class DatabaseSeeder extends Seeder
         $now = $business->now();
         $clientBookings = 0;
 
-        for ($offset = -7; $offset <= 10; $offset++) {
+        $firstDay = $now->startOfMonth()->subMonths(11);
+
+        for ($offset = (int) $firstDay->diffInDays($now->startOfDay()) * -1; $offset <= 10; $offset++) {
             $day = $now->startOfDay()->addDays($offset);
+            $fillRate = match (true) {
+                $offset < -7 => 25 + (int) round(35 * (1 - abs($offset) / 335)),
+                $offset < 0 => 65,
+                default => 35,
+            };
 
             if ($business->blockedDates()->whereDate('date', $day->toDateString())->exists()) {
                 continue;
@@ -129,7 +138,7 @@ class DatabaseSeeder extends Seeder
                     $service = $services->random();
                     $end = $cursor->addMinutes($service->duration_minutes);
 
-                    if ($end->gt($closesAt) || random_int(1, 100) > ($offset < 0 ? 65 : 35)) {
+                    if ($end->gt($closesAt) || random_int(1, 100) > $fillRate) {
                         $cursor = $cursor->addMinutes(30);
 
                         continue;

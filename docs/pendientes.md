@@ -16,6 +16,7 @@ Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué re
 - [x] Crear citas desde el panel, con correo opcional
 - [x] Correos con la marca de ReservaPro y todos los textos en español
 - [x] Logo y foto de portada del negocio, subidos desde Ajustes
+- [x] Reportes de ingresos y citas por mes y por servicio, con exportación a CSV
 
 ## Prioridad alta
 
@@ -33,7 +34,6 @@ Funciones que hacen crecer el producto.
   - En la reserva se elegiría "cualquiera" o una persona concreta.
 - [ ] **Pagos en línea o anticipo al reservar** (Stripe o Mercado Pago). La cita quedaría "por confirmar" hasta recibir el pago.
 - [ ] **Recordatorios por WhatsApp o SMS.** Agregar un canal más a `AppointmentReminder`, que hoy solo envía correo, para que el cliente elija cómo recibirlos.
-- [ ] **Reportes.** Exportar las citas a CSV e ingresos por mes y por servicio en una pantalla nueva del panel.
 - [ ] **Mover citas arrastrándolas en la agenda.** `AppointmentBooker::reschedule()` ya hace el trabajo; falta el arrastre en el calendario.
 - [ ] **Agendar con un clic en un hueco libre del calendario.** Hoy se usa el botón «Nueva cita»; el clic abriría `NewAppointment` con el día y la hora ya elegidos.
 

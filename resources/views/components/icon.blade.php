@@ -9,6 +9,7 @@
         'calendar' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
         'calendar-check' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>',
         'calendar-plus' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v6M9 17h6"/>',
+        'chart' => '<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V7M18 17v-8"/>',
         'check' => '<path d="M20 6 9 17l-5-5"/>',
         'check-circle' => '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
         'chevron-left' => '<path d="m15 18-6-6 6-6"/>',

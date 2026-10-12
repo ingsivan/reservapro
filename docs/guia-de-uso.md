@@ -92,6 +92,14 @@ Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el 
 - Si la hora de cierre es menor que la de apertura (22:00–02:00), el turno termina al día siguiente.
 - En **Días cerrados**, bloquea festivos o vacaciones. Ese día nadie podrá reservar.
 
+### Reportes
+
+- Elige el periodo: los últimos 3, 6 o 12 meses, contando el mes en curso.
+- Arriba ves los ingresos, las citas, el ticket promedio y el porcentaje de cancelaciones. Los ingresos suman las citas confirmadas y atendidas; las citas cuentan todo menos las canceladas.
+- La gráfica muestra los ingresos de cada mes. Pasa el cursor o toca una barra para ver el detalle; el mes en curso se ve más claro porque todavía no termina. **Ver como tabla** muestra los mismos números.
+- **Por servicio** ordena tus servicios por lo que dejan y su parte del total.
+- **Exportar CSV** descarga las citas del periodo (código, fecha, horario, servicio, cliente, contacto, estado, precio y notas) para abrirlas en Excel, Numbers o Google Sheets.
+
 ### Ajustes
 
 **Imagen de tu página:** sube tu logo (cuadrado, de al menos 96 px) y una foto de portada (horizontal, de al menos 800 × 200 px) en JPG, PNG o WebP. Se guardan al elegirlas y se ven en tu página de reservas y en el menú del panel. Si no subes logo, se muestran tus iniciales.

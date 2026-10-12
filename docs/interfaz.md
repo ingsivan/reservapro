@@ -39,7 +39,7 @@ Están en `resources/views/components`.
 | `x-logo` | Logo de ReservaPro. | — |
 | `x-business-avatar` | Logo del negocio, o sus iniciales sobre un cuadro oscuro si no tiene. El tamaño y la forma van en `class`. | `<x-business-avatar :business="$business" class="size-9 rounded-lg" />` |
 
-Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
+Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `chart`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
 
 ### Mostrar un aviso
 
@@ -106,6 +106,11 @@ stateDiagram-v2
   - El filtro queda en la URL (`?estado=pending`).
 - **Servicios:** tarjetas con un interruptor Visible / Oculto; el formulario se abre en una ventana.
 - **Horario:** ventanas por día con una barra que las dibuja sobre las 24 horas.
+- **Reportes:**
+  - Botones de periodo (3, 6 o 12 meses, guardado en la URL como `?meses=12`) y el enlace **Exportar CSV**.
+  - Cuatro tarjetas de métricas.
+  - Gráfica de barras hecha con HTML y Tailwind, sin librerías: una sola serie en `teal-600`, barras delgadas con la punta redondeada y el mes en curso más claro. Cada barra se puede enfocar con el teclado y muestra un tooltip; **Ver como tabla** da los mismos datos sin depender del color.
+  - Lista por servicio con una barra de proporción.
 - **Ajustes:** tarjeta con el enlace público, vista previa de la portada y el logo (cada imagen se guarda al elegirla) y los datos del negocio.
 
 ### Cliente
