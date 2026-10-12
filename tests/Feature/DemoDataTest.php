@@ -29,15 +29,19 @@ class DemoDataTest extends TestCase
     }
 
     #[Test]
-    public function the_seeded_appointments_never_overlap(): void
+    public function the_seeded_appointments_of_each_barber_never_overlap(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $appointments = Business::sole()->appointments()->orderBy('starts_at')->get();
+        $business = Business::sole();
+        $this->assertSame(3, $business->staffMembers()->count());
+        $this->assertSame(0, $business->appointments()->whereNull('staff_member_id')->count());
 
-        foreach ($appointments->sliding(2) as $pair) {
-            [$first, $second] = $pair->values()->all();
-            $this->assertTrue($first->ends_at->lte($second->starts_at), "{$first->code} overlaps {$second->code}");
+        foreach ($business->appointments()->orderBy('starts_at')->get()->groupBy('staff_member_id') as $appointments) {
+            foreach ($appointments->sliding(2) as $pair) {
+                [$first, $second] = $pair->values()->all();
+                $this->assertTrue($first->ends_at->lte($second->starts_at), "{$first->code} overlaps {$second->code}");
+            }
         }
     }
 }

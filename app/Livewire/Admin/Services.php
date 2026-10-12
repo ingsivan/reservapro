@@ -82,7 +82,9 @@ class Services extends Component
             $this->findService($this->editingId)->update($attributes);
             $this->notify('Servicio actualizado.');
         } else {
-            $this->business->services()->create($attributes);
+            $service = $this->business->services()->create($attributes);
+            // Everyone on the team offers a new service until the owner says otherwise.
+            $service->staffMembers()->attach($this->business->staffMembers()->active()->pluck('id'));
             $this->notify('Servicio creado. Ya aparece en tu página de reservas.');
         }
 

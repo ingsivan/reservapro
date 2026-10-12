@@ -37,6 +37,8 @@ Están en `resources/views/components`.
 | `x-time-picker` | Fila de días con sus horarios libres y las horas del día elegido, agrupadas en mañana, tarde y noche. Llama a los métodos de Livewire `select-date` y `select-slot`. Se usa en la reserva, al cambiar el horario y en el panel de la cita. | `<x-time-picker :business="$business" :availability="$this->availability" :date="$date" :selected="$startsAt" />` |
 | `x-admin.appointment-actions` | Botones según el estado de la cita: confirmar, reprogramar, cancelar, atendida o no asistió. | `<x-admin.appointment-actions :appointment="$appointment" />` |
 | `x-logo` | Logo de ReservaPro. | — |
+| `x-staff-avatar` | Iniciales de una persona del equipo sobre su color. | `<x-staff-avatar :staff-member="$person" class="size-7 text-xs" />` |
+| `x-staff-picker` | "¿Con quién?": "Quien esté libre" y una opción por persona. Llama al método `select` de Livewire (por defecto `selectStaff`). Se usa en la reserva y en Nueva cita. | `<x-staff-picker :staff="$this->staffOptions" :selected="$staffMemberId" />` |
 | `x-business-avatar` | Logo del negocio, o sus iniciales sobre un cuadro oscuro si no tiene. El tamaño y la forma van en `class`. | `<x-business-avatar :business="$business" class="size-9 rounded-lg" />` |
 
 Iconos disponibles: `alert`, `arrow-left`, `arrow-right`, `bell`, `calendar`, `calendar-check`, `calendar-plus`, `chart`, `check`, `check-circle`, `chevron-left`, `chevron-right`, `clock`, `copy`, `download`, `external`, `hourglass`, `link`, `logout`, `mail`, `map-pin`, `moon`, `pencil`, `phone`, `plus`, `shield`, `sliders`, `sparkles`, `sun`, `sunset`, `tag`, `trash`, `user`, `users`, `wallet` y `x`. Para agregar uno, suma su trazo (en una caja de 24 × 24) al arreglo de `icon.blade.php`.
@@ -88,6 +90,7 @@ stateDiagram-v2
 ```
 
 - La propiedad `step` guarda el paso visible. `goToStep()` solo deja ir a un paso cuyas decisiones previas ya están tomadas.
+- Con equipo, el paso 2 empieza con "¿Con quién?" (`x-staff-picker`). Cambiar de persona recalcula los horarios y conserva el día si sigue teniendo lugar. Si el servicio lo ofrece una sola persona, solo dice "Te atiende …".
 - Si alguien gana la hora mientras el cliente llena sus datos, la reserva regresa al paso 2 con el aviso "Ese horario ya no está disponible".
 - Cada día muestra cuántos horarios libres tiene, "Cerrado" si el negocio no abre ese día de la semana, o "Sin lugar" si ya se llenó o está bloqueado.
 - Al cambiar de paso, la página se desplaza hasta el asistente si quedó fuera de la vista (importante en el celular).
@@ -97,15 +100,17 @@ stateDiagram-v2
 
 - **Menú lateral** en pantallas grandes y pestañas con iconos en el celular. Incluye el enlace a la página de reservas con un botón para copiarlo.
 - **Agenda:**
-  - Métricas de la semana y filtros por estado.
+  - Métricas de la semana, filtros por estado y, con equipo, por persona (`?equipo=3`).
+  - Cada bloque lleva un punto con el color de quien atiende. Las citas que se cruzan se reparten el ancho del día (`CalendarLayout`); con tres o más a la vez, el bloque solo muestra el punto y el detalle va en el `title`.
   - Calendario semanal con una línea roja en la hora actual.
   - Lista de citas del día seleccionado.
   - Al hacer clic en una cita se abre un panel lateral con sus datos y acciones; se cierra con Esc o al hacer clic fuera.
   - **Reprogramar** cambia el contenido del panel por el selector de día y hora, sin salir de la agenda.
   - **Nueva cita** abre otro panel lateral con servicio, selector de día y hora y los datos del cliente. Se abre con el evento `new-appointment` (`$dispatch('new-appointment', { date })`).
   - El filtro queda en la URL (`?estado=pending`).
+- **Equipo:** tarjetas con las iniciales de color, puesto, servicios, si usa horario propio y citas próximas; interruptor para recibir reservas. El formulario se abre en una ventana con colores y casillas de servicios.
 - **Servicios:** tarjetas con un interruptor Visible / Oculto; el formulario se abre en una ventana.
-- **Horario:** ventanas por día con una barra que las dibuja sobre las 24 horas.
+- **Horario:** ventanas por día con una barra que las dibuja sobre las 24 horas. Con equipo, una fila de botones elige de quién es el horario; quien usa el del negocio lo ve en solo lectura.
 - **Reportes:**
   - Botones de periodo (3, 6 o 12 meses, guardado en la URL como `?meses=12`) y el enlace **Exportar CSV**.
   - Cuatro tarjetas de métricas.

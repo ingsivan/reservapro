@@ -17,6 +17,7 @@ Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué re
 - [x] Correos con la marca de ReservaPro y todos los textos en español
 - [x] Logo y foto de portada del negocio, subidos desde Ajustes
 - [x] Reportes de ingresos y citas por mes y por servicio, con exportación a CSV
+- [x] Varios empleados por negocio, cada uno con su agenda, sus servicios y su horario
 
 ## Prioridad alta
 
@@ -28,13 +29,11 @@ Ya están todas hechas (ver arriba). Lo siguiente es la prioridad media.
 
 Funciones que hacen crecer el producto.
 
-- [ ] **Varios empleados por negocio**, cada uno con su agenda.
-  - Agregar el modelo `StaffMember`, y que horarios y citas pertenezcan a un empleado.
-  - `AvailabilityService` calcularía la disponibilidad por empleado.
-  - En la reserva se elegiría "cualquiera" o una persona concreta.
 - [ ] **Pagos en línea o anticipo al reservar** (Stripe o Mercado Pago). La cita quedaría "por confirmar" hasta recibir el pago.
 - [ ] **Recordatorios por WhatsApp o SMS.** Agregar un canal más a `AppointmentReminder`, que hoy solo envía correo, para que el cliente elija cómo recibirlos.
 - [ ] **Mover citas arrastrándolas en la agenda.** `AppointmentBooker::reschedule()` ya hace el trabajo; falta el arrastre en el calendario.
+- [ ] **Días libres por persona** (vacaciones de un empleado). Hoy los días cerrados aplican a todo el negocio; bastaría un `staff_member_id` opcional en `blocked_dates`.
+- [ ] **Acceso para empleados:** que cada persona entre con su cuenta y vea solo su agenda.
 - [ ] **Agendar con un clic en un hueco libre del calendario.** Hoy se usa el botón «Nueva cita»; el clic abriría `NewAppointment` con el día y la hora ya elegidos.
 
 ## Prioridad baja

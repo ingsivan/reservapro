@@ -35,6 +35,10 @@
                             @error('serviceId') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
                         </div>
 
+                        @if ($this->staffOptions->count() > 1)
+                            <x-staff-picker :staff="$this->staffOptions" :selected="$staffMemberId" />
+                        @endif
+
                         <div>
                             <p class="text-sm font-medium text-slate-700">Día y hora</p>
                             @error('startsAt')

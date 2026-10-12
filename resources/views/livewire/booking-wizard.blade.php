@@ -3,6 +3,8 @@
     use Carbon\CarbonImmutable;
 
     $service = $this->selectedService;
+    $staffMember = $this->selectedStaffMember;
+    $hasTeam = $this->staffOptions->isNotEmpty();
     $selectedTime = $this->selectedSlot;
     $openingStatus = $business->openingStatus();
     $steps = [1 => 'Servicio', 2 => 'Día y hora', 3 => 'Tus datos'];
@@ -73,6 +75,7 @@
                         @foreach ([
                             ['tag', 'Servicio', $appointment->service->name.' · '.$appointment->service->formattedDuration()],
                             ['calendar', 'Fecha y hora', $appointment->whenLabel()],
+                            ...($appointment->staffMember ? [['users', 'Te atiende', $appointment->staffMember->name]] : []),
                             ['wallet', 'Precio', $appointment->formattedPrice().' · se paga en el local'],
                         ] as [$icon, $label, $value])
                             <div class="flex items-start gap-3 px-4 py-3">
@@ -181,6 +184,14 @@
                             </button>
                         </div>
 
+                        @if ($this->staffOptions->count() > 1)
+                            <x-staff-picker :staff="$this->staffOptions" :selected="$staffMemberId" class="mt-5" />
+                        @elseif ($hasTeam)
+                            <p class="mt-4 flex items-center gap-2 text-sm text-slate-600">
+                                <x-staff-avatar :staff-member="$this->staffOptions->first()" class="size-7 text-xs" /> Te atiende {{ $this->staffOptions->first()->name }}
+                            </p>
+                        @endif
+
                         @error('slot')
                             <p class="mt-4 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">
                                 <x-icon name="alert" class="mt-0.5 size-4" /> {{ $message }}
@@ -189,7 +200,11 @@
 
                         @if (collect($this->availability)->filter()->isEmpty())
                             <p class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-                                No hay horarios libres en los próximos {{ $business->booking_window_days }} días. Prueba con otro servicio o vuelve más tarde.
+                                @if ($staffMember)
+                                    {{ $staffMember->firstName() }} no tiene horarios libres en los próximos {{ $business->booking_window_days }} días. Prueba con otra persona o con quien esté libre.
+                                @else
+                                    No hay horarios libres en los próximos {{ $business->booking_window_days }} días. Prueba con otro servicio o vuelve más tarde.
+                                @endif
                             </p>
                         @else
                             <x-time-picker :business="$business" :availability="$this->availability" :date="$date" :selected="$startsAt" class="mt-5" />
@@ -208,7 +223,7 @@
 
                         <div class="mt-5 flex items-center gap-3 rounded-xl bg-teal-50 px-4 py-3 text-sm text-teal-900 ring-1 ring-teal-600/10">
                             <x-icon name="calendar-check" class="size-5 text-teal-600" />
-                            <p><strong>{{ $service->name }}</strong> · <span class="first-letter:uppercase">{{ $selectedTime->translatedFormat('l j \d\e F, H:i') }}</span></p>
+                            <p><strong>{{ $service->name }}</strong>{{ $staffMember ? ' con '.$staffMember->firstName() : '' }} · <span class="first-letter:uppercase">{{ $selectedTime->translatedFormat('l j \d\e F, H:i') }}</span></p>
                         </div>
 
                         <form id="booking-form" wire:submit="book" class="mt-5 grid gap-4 sm:grid-cols-2">
@@ -240,6 +255,7 @@
                     <dl class="mt-4 space-y-3 text-sm">
                         @foreach ([
                             ['tag', 'Servicio', $service?->name],
+                            ...($hasTeam ? [['users', 'Con', $staffMember?->name ?? 'Quien esté libre']] : []),
                             ['calendar', 'Día', $selectedTime?->translatedFormat('l j \d\e F') ?? $selectedDay?->translatedFormat('l j \d\e F')],
                             ['clock', 'Hora', $selectedTime ? $selectedTime->format('H:i').' – '.$selectedTime->addMinutes($service->duration_minutes)->format('H:i') : null],
                         ] as [$icon, $label, $value])

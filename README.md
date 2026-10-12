@@ -25,12 +25,13 @@
 - **Reprogramar desde la agenda:** el negocio mueve una cita a otro horario libre y el cliente recibe un correo con el antes y el después.
 - **Citas por teléfono o sin cita:** desde la agenda, el negocio agenda una cita confirmada al momento; el correo del cliente es opcional.
 - **Confirmación manual opcional:** las citas pueden quedar "por confirmar" hasta que el negocio las apruebe.
+- **Equipo:** cada persona tiene su agenda, sus servicios y su horario (el del negocio o uno propio). El cliente elige con quién o deja que se asigne a quien esté libre, y la agenda filtra por persona y pone lado a lado las citas a la misma hora.
 - **Panel del administrador:** menú lateral, agenda semanal tipo calendario con línea de la hora actual, filtros por estado y un panel lateral con el detalle de cada cita; estadísticas de la semana, servicios con interruptor de visible/oculto, horario semanal, días bloqueados y ajustes.
 - **Reportes:** ingresos por mes en una gráfica, citas, ticket promedio, porcentaje de cancelaciones y qué servicios dejan más, para los últimos 3, 6 o 12 meses. Las citas del periodo se descargan en CSV para abrirlas en Excel o Google Sheets.
 - **Logo y portada:** cada negocio sube su logo y una foto de portada desde Ajustes; sin ellos, la página usa sus iniciales y un degradado.
 - **Interfaz cuidada:** avisos tipo toast, ventana propia para confirmar acciones que no se pueden deshacer, estados de carga y diseño adaptado al celular.
 - **Cuentas de cliente:** quien se registra ve sus citas en "Mis citas", puede cambiarlas o cancelarlas y recuperar su contraseña por correo.
-- **Negocio demo** con un año de historial de citas y diez días hacia adelante.
+- **Negocio demo** con tres barberos, un año de historial de citas y diez días hacia adelante.
 
 | Reserva | Confirmación | En el celular |
 |---------|--------------|---------------|
@@ -40,13 +41,13 @@
 |--------|---------------------|-----------|
 | ![Inicio](docs/screenshots/home.png) | ![Panel lateral con el detalle de la cita](docs/screenshots/appointment.png) | ![Servicios](docs/screenshots/services.png) |
 
-| Horario | Ajustes | Cambiar horario |
-|---------|---------|-----------------|
-| ![Horario y días cerrados](docs/screenshots/schedule.png) | ![Ajustes del negocio](docs/screenshots/settings.png) | ![El cliente elige otro horario](docs/screenshots/reschedule.png) |
+| Equipo | Horario | Ajustes |
+|--------|---------|---------|
+| ![Equipo con su agenda y servicios](docs/screenshots/team.png) | ![Horario y días cerrados](docs/screenshots/schedule.png) | ![Ajustes del negocio](docs/screenshots/settings.png) |
 
-| Reportes | Correo de confirmación |
-|----------|------------------------|
-| ![Ingresos por mes y por servicio](docs/screenshots/reports.png) | ![Correo con la marca de ReservaPro](docs/screenshots/email.png) |
+| Reportes | Cambiar horario | Correo de confirmación |
+|----------|-----------------|------------------------|
+| ![Ingresos por mes, por servicio y por persona](docs/screenshots/reports.png) | ![El cliente elige otro horario](docs/screenshots/reschedule.png) | ![Correo con la marca de ReservaPro](docs/screenshots/email.png) |
 
 ## Stack
 
@@ -88,7 +89,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 129 tests
+php artisan test        # 148 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
@@ -121,7 +122,7 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Correos con la marca de ReservaPro, todo en español
 - [x] Logo y foto de portada de cada negocio
 - [x] Reportes de ingresos y citas, con exportación a CSV
-- [ ] Varios empleados por negocio, cada uno con su agenda
+- [x] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp
 

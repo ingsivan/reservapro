@@ -2,6 +2,8 @@
     use App\Enums\AppointmentStatus;
 
     $grid = $this->gridHours;
+    $lanes = $this->calendarLanes;
+    $hasTeam = $this->staffMembers->isNotEmpty();
     $hourHeight = 52;
     $gridMinutes = ($grid['end'] - $grid['start']) * 60;
     $now = $this->business->now();
@@ -72,6 +74,28 @@
         @endforeach
     </div>
 
+    {{-- Staff filter --}}
+    @if ($hasTeam)
+        <div class="no-scrollbar mt-3 flex items-center gap-2 overflow-x-auto" role="group" aria-label="Filtrar por persona">
+            <button type="button" wire:click="filterByStaff('')" aria-pressed="{{ $staffFilter === '' ? 'true' : 'false' }}"
+                    @class([
+                        'rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap ring-1 transition ring-inset',
+                        'bg-slate-900 text-white ring-slate-900' => $staffFilter === '',
+                        'bg-white text-slate-600 ring-slate-200 hover:ring-slate-300' => $staffFilter !== '',
+                    ])>Todo el equipo</button>
+            @foreach ($this->staffMembers as $person)
+                <button type="button" wire:click="filterByStaff('{{ $person->id }}')" wire:key="staff-filter-{{ $person->id }}" aria-pressed="{{ $staffFilter === (string) $person->id ? 'true' : 'false' }}"
+                        @class([
+                            'inline-flex items-center gap-1.5 rounded-full py-1 pr-3 pl-1.5 text-sm font-medium whitespace-nowrap ring-1 transition ring-inset',
+                            'bg-slate-900 text-white ring-slate-900' => $staffFilter === (string) $person->id,
+                            'bg-white text-slate-600 ring-slate-200 hover:ring-slate-300' => $staffFilter !== (string) $person->id,
+                        ])>
+                    <x-staff-avatar :staff-member="$person" class="size-5 text-[9px]" /> {{ $person->firstName() }}
+                </button>
+            @endforeach
+        </div>
+    @endif
+
     {{-- Day picker (mobile) --}}
     <div class="mt-4 grid grid-cols-7 gap-1 md:hidden">
         @foreach ($this->weekDays as $day)
@@ -132,13 +156,21 @@
                             $offset = max(0, ($start->hour - $grid['start']) * 60 + $start->minute);
                             $length = min($appointment->starts_at->diffInMinutes($appointment->ends_at), $gridMinutes - $offset);
                             $height = max(20, $length / 60 * $hourHeight - 2);
+                            ['lane' => $lane, 'lanes' => $laneCount] = $lanes[$appointment->id] ?? ['lane' => 0, 'lanes' => 1];
                         @endphp
                         <button type="button" wire:click="viewAppointment({{ $appointment->id }})" wire:key="block-{{ $appointment->id }}"
-                                class="absolute inset-x-1 overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-left text-xs leading-4 transition {{ $blockColors[$appointment->status->value] }}"
-                                style="top: {{ $offset / 60 * $hourHeight + 1 }}px; height: {{ $height }}px"
-                                title="{{ $start->format('H:i') }} · {{ $appointment->service->name }} · {{ $appointment->customer_name }}">
-                            <span class="block truncate"><span class="font-semibold tabular-nums">{{ $start->format('H:i') }}</span> {{ $appointment->customer_name }}</span>
-                            @if ($height >= 34)
+                                class="absolute overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-left text-xs leading-4 transition {{ $blockColors[$appointment->status->value] }}"
+                                style="top: {{ $offset / 60 * $hourHeight + 1 }}px; height: {{ $height }}px; left: calc(4px + (100% - 8px) * {{ $lane }} / {{ $laneCount }}); width: calc((100% - 8px) / {{ $laneCount }} - {{ $laneCount > 1 ? 2 : 0 }}px)"
+                                title="{{ $start->format('H:i') }} · {{ $appointment->service->name }} · {{ $appointment->customer_name }}{{ $appointment->staffMember ? ' · '.$appointment->staffMember->name : '' }}">
+                            <span class="flex items-center gap-1 truncate">
+                                @if ($appointment->staffMember)
+                                    <span class="size-1.5 shrink-0 rounded-full {{ $appointment->staffMember->dotClasses() }}" aria-hidden="true"></span>
+                                @endif
+                                @if ($laneCount < 3)
+                                    <span class="truncate"><span class="font-semibold tabular-nums">{{ $start->format('H:i') }}</span>{{ $laneCount === 1 ? ' '.$appointment->customer_name : '' }}</span>
+                                @endif
+                            </span>
+                            @if ($height >= 34 && $laneCount === 1)
                                 <span class="block truncate opacity-75">{{ $appointment->service->name }}</span>
                             @endif
                         </button>
@@ -175,6 +207,11 @@
                                 <x-status-badge :status="$appointment->status" />
                             </div>
                             <p class="text-sm text-slate-600">{{ $appointment->service->name }} · {{ $appointment->formattedPrice() }}</p>
+                            @if ($appointment->staffMember)
+                                <p class="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+                                    <x-staff-avatar :staff-member="$appointment->staffMember" class="size-5 text-[9px]" /> Con {{ $appointment->staffMember->name }}
+                                </p>
+                            @endif
                             @if ($appointment->notes)
                                 <p class="mt-1 truncate text-sm text-slate-500 italic">“{{ $appointment->notes }}”</p>
                             @endif
@@ -218,7 +255,7 @@
                     <div class="flex-1 overflow-y-auto px-6 py-6">
                         <h3 class="font-semibold text-slate-900">Reprogramar cita</h3>
                         <p class="text-sm text-slate-500">
-                            Ahora: <span class="first-letter:uppercase">{{ $appointment->localStartsAt()->translatedFormat('l j \d\e F, H:i') }}</span> · {{ $appointment->service->name }}
+                            Ahora: <span class="first-letter:uppercase">{{ $appointment->localStartsAt()->translatedFormat('l j \d\e F, H:i') }}</span> · {{ $appointment->service->name }}{{ $appointment->staffMember ? ' con '.$appointment->staffMember->firstName() : '' }}
                         </p>
 
                         @error('rescheduleSlot')
@@ -252,6 +289,18 @@
                                 <dd class="text-slate-500">{{ $appointment->service->formattedDuration() }} · {{ $appointment->formattedPrice() }}</dd>
                             </div>
                         </div>
+                        @if ($appointment->staffMember)
+                            <div class="flex gap-3">
+                                <x-staff-avatar :staff-member="$appointment->staffMember" class="size-5 text-[9px]" />
+                                <div>
+                                    <dt class="sr-only">Te atiende</dt>
+                                    <dd class="font-medium text-slate-900">{{ $appointment->staffMember->name }}</dd>
+                                    @if ($appointment->staffMember->title)
+                                        <dd class="text-slate-500">{{ $appointment->staffMember->title }}</dd>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                         <div class="flex gap-3">
                             <x-icon name="mail" class="mt-0.5 size-5 text-slate-400" />
                             <div class="min-w-0">

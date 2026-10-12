@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
  * localEndsAt() to show them in the business's time zone.
  */
 #[Fillable([
-    'code', 'business_id', 'service_id', 'user_id', 'customer_name', 'customer_email',
+    'code', 'business_id', 'service_id', 'staff_member_id', 'user_id', 'customer_name', 'customer_email',
     'customer_phone', 'notes', 'starts_at', 'ends_at', 'status', 'price_cents',
     'confirmed_at', 'cancelled_at', 'cancelled_by', 'reminder_sent_at',
 ])]
@@ -60,6 +60,11 @@ class Appointment extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    public function staffMember(): BelongsTo
+    {
+        return $this->belongsTo(StaffMember::class);
     }
 
     public function user(): BelongsTo

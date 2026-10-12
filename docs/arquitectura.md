@@ -13,6 +13,10 @@ erDiagram
     businesses ||--o{ blocked_dates : "cierra en"
     businesses ||--o{ appointments : recibe
     services ||--o{ appointments : "se reserva en"
+    businesses ||--o{ staff_members : "tiene en su equipo"
+    staff_members }o--o{ services : ofrece
+    staff_members ||--o{ schedules : "trabaja en (horario propio)"
+    staff_members ||--o{ appointments : atiende
 ```
 
 | Tabla | Qué guarda |
@@ -20,9 +24,10 @@ erDiagram
 | `users` | Cuentas con rol `admin` (dueño de negocio) o `client`. |
 | `businesses` | Nombre, dirección pública (`slug`), zona horaria y reglas: intervalo entre horarios, anticipación mínima, días hacia adelante, aviso para cancelar y si las citas requieren confirmación. |
 | `services` | Nombre, duración en minutos, precio en centavos y si está visible. |
-| `schedules` | Una ventana de apertura por fila: día de la semana, hora de apertura y de cierre. Un día puede tener varias (turno partido). |
+| `schedules` | Una ventana de apertura por fila: día de la semana, hora de apertura y de cierre. Un día puede tener varias (turno partido). Sin `staff_member_id` es el horario del negocio; con él, el horario propio de esa persona. |
+| `staff_members` | Las personas del equipo: nombre, puesto, color en la agenda y si recibe reservas. `service_staff_member` dice qué servicios ofrece cada una. |
 | `blocked_dates` | Días completos cerrados (festivos, vacaciones). |
-| `appointments` | Cliente, servicio, inicio y fin **en UTC**, estado, precio al momento de reservar y un código público de 8 caracteres. |
+| `appointments` | Cliente, servicio, quién atiende (`staff_member_id`, vacío en un negocio sin equipo), inicio y fin **en UTC**, estado, precio al momento de reservar y un código público de 8 caracteres. |
 
 El precio se copia a la cita al reservar, así que cambiar el precio de un servicio no altera el historial.
 
@@ -50,6 +55,20 @@ flowchart TD
     G -- Sí --> F
     G -- No --> H[Horario libre]
 ```
+
+### Con equipo
+
+Si el negocio tiene personas activas en **Equipo**, cada una es una agenda aparte. El cálculo de arriba se hace por persona, con:
+
+- solo quienes están activos y ofrecen el servicio;
+- su horario propio, o el del negocio si no tiene uno;
+- solo sus citas (más las citas sin persona, de antes de tener equipo, que bloquean a todos).
+
+Un horario está libre si al menos una persona lo tiene libre. Si el cliente eligió a alguien, solo cuenta esa persona. Los días cerrados aplican a todo el equipo.
+
+Al reservar sin preferencia, `AppointmentBooker` asigna la cita a la persona libre con menos citas ese día. Al reprogramar, la cita se queda con la misma persona.
+
+Sin personas activas, el negocio entero es una sola agenda, como antes.
 
 Dos citas se cruzan cuando `inicioA < finB` y `finA > inicioB`. Por eso dos citas seguidas (10:00–11:00 y 11:00–12:00) sí se permiten. Las citas canceladas liberan su horario.
 
@@ -96,7 +115,9 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 | `App\Livewire\BookingWizard` | Página pública de reserva en tres pasos. |
 | `App\Livewire\Admin\Agenda` | Calendario semanal, lista del día, estadísticas y acciones sobre las citas. |
 | `App\Livewire\Admin\NewAppointment` | Panel para agendar una cita por teléfono o sin cita, dentro de la agenda. Avisa con el evento `appointment-created` para que la agenda salte a ese día. |
-| `App\Livewire\Admin\Services`, `ScheduleManager`, `BusinessSettings` | Catálogo, horario semanal y días cerrados, y ajustes del negocio. |
+| `App\Livewire\Admin\Services`, `ScheduleManager`, `BusinessSettings` | Catálogo, horario semanal (del negocio o de cada persona) y días cerrados, y ajustes del negocio. |
+| `App\Livewire\Admin\Team` | Personas del equipo, sus servicios y su color. La primera que se agrega se queda con las citas que ya existían. |
+| `App\Support\CalendarLayout` | Pone lado a lado las citas que se cruzan en la agenda semanal (de distintas personas). |
 | `App\Livewire\MyAppointments` | Citas del cliente con cuenta. |
 | `App\Livewire\RescheduleAppointment` | Cambiar el horario desde el enlace firmado del correo. |
 | `App\Http\Controllers\Auth\ForgotPasswordController`, `ResetPasswordController` | Recuperar la contraseña con el broker de Laravel. |

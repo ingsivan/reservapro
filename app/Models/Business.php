@@ -46,9 +46,26 @@ class Business extends Model
         return $this->hasMany(Service::class);
     }
 
+    /**
+     * Opening hours of the business. Staff members' own hours are left out.
+     */
     public function schedules(): HasMany
     {
-        return $this->hasMany(Schedule::class);
+        return $this->hasMany(Schedule::class)->whereNull('staff_member_id');
+    }
+
+    public function staffMembers(): HasMany
+    {
+        return $this->hasMany(StaffMember::class);
+    }
+
+    /**
+     * Whether appointments are booked with a person of the team, rather
+     * than with the business as a whole.
+     */
+    public function hasTeam(): bool
+    {
+        return $this->staffMembers()->active()->exists();
     }
 
     public function blockedDates(): HasMany

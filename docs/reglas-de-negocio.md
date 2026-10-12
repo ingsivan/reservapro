@@ -90,3 +90,14 @@ Los correos se mandan por la cola, así que reservar no espera al servidor de co
 - Quitar una ventana de horario no cancela las citas ya reservadas en ella.
 - Bloquear un día con citas avisa al dueño cuántas hay, para que decida si las cancela.
 - Dos ventanas del mismo día no pueden encimarse.
+
+## Equipo
+
+- Sin personas en **Equipo**, el negocio es una sola agenda: no puede haber dos citas a la misma hora.
+- Con equipo, cada persona tiene su agenda. Puede haber tantas citas a la misma hora como personas libres que ofrezcan el servicio.
+- El cliente elige con quién o deja "Quien esté libre". En ese caso la cita va a la persona libre con menos citas ese día.
+- Cada persona trabaja el horario del negocio o uno propio. Los días cerrados son para todo el equipo.
+- La primera persona que se agrega se queda con las citas que ya tenía el negocio.
+- Reprogramar mantiene a la misma persona.
+- Quien tiene citas registradas no se borra: deja de recibir reservas y sus citas siguen en la agenda.
+- Los correos y la página de la cita dicen quién atiende.

@@ -7,6 +7,7 @@ use App\Enums\CancelledBy;
 use App\Enums\Role;
 use App\Models\Business;
 use App\Models\Service;
+use App\Models\StaffMember;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
@@ -91,6 +92,21 @@ class DatabaseSeeder extends Seeder
         }
         $business->schedules()->create(['day_of_week' => 6, 'opens_at' => '09:00', 'closes_at' => '15:00']);
 
+        $services = $business->services()->pluck('id', 'name');
+        foreach ([
+            ['Diego Ramírez', 'Barbero', 'teal', $services->values()->all(), []],
+            ['Sofía Herrera', 'Barbera y colorista', 'violet', $services->except('Afeitado clásico')->values()->all(), []],
+            // Works afternoons and Saturdays, with hours of his own.
+            ['Luis Ortega', 'Barbero', 'amber', $services->only(['Corte de cabello', 'Corte y barba', 'Corte infantil'])->values()->all(), [[3, '16:00', '20:00'], [4, '16:00', '20:00'], [5, '16:00', '20:00'], [6, '09:00', '15:00']]],
+        ] as [$name, $title, $color, $serviceIds, $hours]) {
+            $staffMember = $business->staffMembers()->create(['name' => $name, 'title' => $title, 'color' => $color]);
+            $staffMember->services()->attach($serviceIds);
+
+            foreach ($hours as [$day, $opensAt, $closesAt]) {
+                $staffMember->schedules()->create(['business_id' => $business->id, 'day_of_week' => $day, 'opens_at' => $opensAt, 'closes_at' => $closesAt]);
+            }
+        }
+
         $business->blockedDates()->create([
             'date' => $business->now()->addDays(12)->toDateString(),
             'reason' => 'Capacitación del equipo',
@@ -105,13 +121,16 @@ class DatabaseSeeder extends Seeder
     }
 
     /**
-     * Fill the slots from eleven months ago to ten days ahead. Older months
-     * are quieter, so the reports show a business that is growing.
+     * Fill each barber's slots from eleven months ago to ten days ahead.
+     * Older months are quieter, so the reports show a business that is growing.
      */
     private function seedAppointments(Business $business, User $client): void
     {
-        $services = $business->services()->get();
-        $schedules = $business->schedules()->get()->groupBy('day_of_week');
+        $staff = $business->staffMembers()->with('services')->get()->map(fn (StaffMember $staffMember) => [
+            'member' => $staffMember,
+            'services' => $staffMember->services,
+            'schedules' => $staffMember->workingSchedules()->groupBy('day_of_week'),
+        ]);
         $now = $business->now();
         $clientBookings = 0;
 
@@ -120,40 +139,42 @@ class DatabaseSeeder extends Seeder
         for ($offset = (int) $firstDay->diffInDays($now->startOfDay()) * -1; $offset <= 10; $offset++) {
             $day = $now->startOfDay()->addDays($offset);
             $fillRate = match (true) {
-                $offset < -7 => 25 + (int) round(35 * (1 - abs($offset) / 335)),
-                $offset < 0 => 65,
-                default => 35,
+                $offset < -7 => 15 + (int) round(30 * (1 - abs($offset) / 335)),
+                $offset < 0 => 55,
+                default => 30,
             };
 
             if ($business->blockedDates()->whereDate('date', $day->toDateString())->exists()) {
                 continue;
             }
 
-            foreach ($schedules->get($day->dayOfWeek, []) as $schedule) {
-                $cursor = $day->setTimeFromTimeString($schedule->opensAtTime());
-                $closesAt = $day->setTimeFromTimeString($schedule->closesAtTime());
+            foreach ($staff as ['member' => $staffMember, 'services' => $services, 'schedules' => $schedules]) {
+                foreach ($schedules->get($day->dayOfWeek, []) as $schedule) {
+                    $cursor = $day->setTimeFromTimeString($schedule->opensAtTime());
+                    $closesAt = $day->setTimeFromTimeString($schedule->closesAtTime());
 
-                while ($cursor->lt($closesAt)) {
-                    /** @var Service $service */
-                    $service = $services->random();
-                    $end = $cursor->addMinutes($service->duration_minutes);
+                    while ($cursor->lt($closesAt)) {
+                        /** @var Service $service */
+                        $service = $services->random();
+                        $end = $cursor->addMinutes($service->duration_minutes);
 
-                    if ($end->gt($closesAt) || random_int(1, 100) > $fillRate) {
-                        $cursor = $cursor->addMinutes(30);
+                        if ($end->gt($closesAt) || random_int(1, 100) > $fillRate) {
+                            $cursor = $cursor->addMinutes(30);
 
-                        continue;
+                            continue;
+                        }
+
+                        $isClient = $offset > 0 && $clientBookings < 2 && random_int(1, 6) === 1;
+                        $this->createAppointment($business, $service, $staffMember, $cursor, $now, $isClient ? $client : null);
+                        $clientBookings += $isClient ? 1 : 0;
+                        $cursor = $end;
                     }
-
-                    $isClient = $offset > 0 && $clientBookings < 2 && random_int(1, 6) === 1;
-                    $this->createAppointment($business, $service, $cursor, $now, $isClient ? $client : null);
-                    $clientBookings += $isClient ? 1 : 0;
-                    $cursor = $end;
                 }
             }
         }
     }
 
-    private function createAppointment(Business $business, Service $service, CarbonImmutable $start, CarbonImmutable $now, ?User $client): void
+    private function createAppointment(Business $business, Service $service, StaffMember $staffMember, CarbonImmutable $start, CarbonImmutable $now, ?User $client): void
     {
         $name = $client?->name ?? self::CUSTOMERS[array_rand(self::CUSTOMERS)];
         $status = $this->randomStatus($start->lt($now));
@@ -162,6 +183,7 @@ class DatabaseSeeder extends Seeder
 
         $appointment = $business->appointments()->create([
             'service_id' => $service->id,
+            'staff_member_id' => $staffMember->id,
             'user_id' => $client?->id,
             'customer_name' => $name,
             'customer_email' => $client?->email ?? str($name)->ascii()->lower()->replace(' ', '.')->append('@example.com')->toString(),

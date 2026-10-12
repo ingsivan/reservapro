@@ -6,6 +6,7 @@ use App\Exceptions\SlotUnavailableException;
 use App\Livewire\Concerns\ManagesBusiness;
 use App\Livewire\Concerns\ShowsNotices;
 use App\Models\Service;
+use App\Models\StaffMember;
 use App\Services\AppointmentBooker;
 use App\Services\AvailabilityService;
 use Carbon\CarbonImmutable;
@@ -29,6 +30,9 @@ class NewAppointment extends Component
 
     #[Validate('required|integer', message: 'Elige un servicio.')]
     public ?int $serviceId = null;
+
+    /** Who attends (null: whoever is free). */
+    public ?int $staffMemberId = null;
 
     public ?string $date = null;
 
@@ -54,7 +58,7 @@ class NewAppointment extends Component
     #[On('new-appointment')]
     public function start(?string $date = null): void
     {
-        $this->reset('serviceId', 'date', 'startsAt', 'customerName', 'customerPhone', 'customerEmail', 'notes');
+        $this->reset('serviceId', 'staffMemberId', 'date', 'startsAt', 'customerName', 'customerPhone', 'customerEmail', 'notes');
         $this->resetValidation();
         $this->open = true;
         $this->selectService($this->services->first()?->id ?? 0, $date);
@@ -69,12 +73,25 @@ class NewAppointment extends Component
     {
         $this->serviceId = $this->services->firstWhere('id', $serviceId)?->id;
         $this->startsAt = null;
-        unset($this->selectedService, $this->availability);
+        unset($this->selectedService, $this->staffOptions);
+        $this->staffMemberId = $this->staffOptions->firstWhere('id', $this->staffMemberId)?->id;
+        unset($this->selectedStaffMember, $this->availability);
 
         $preferredDate ??= $this->date;
         $this->date = ! empty($this->availability[$preferredDate] ?? [])
             ? $preferredDate
             : collect($this->availability)->filter()->keys()->first();
+    }
+
+    public function selectStaff(?int $staffMemberId): void
+    {
+        $this->staffMemberId = $this->staffOptions->firstWhere('id', $staffMemberId)?->id;
+        $this->startsAt = null;
+        unset($this->selectedStaffMember, $this->availability);
+
+        if (empty($this->availability[$this->date] ?? [])) {
+            $this->date = collect($this->availability)->filter()->keys()->first();
+        }
     }
 
     public function selectDate(string $date): void
@@ -109,7 +126,7 @@ class NewAppointment extends Component
                 'customer_email' => $this->customerEmail ?: null,
                 'customer_phone' => $this->customerPhone ?: null,
                 'notes' => $this->notes ?: null,
-            ], byBusiness: true);
+            ], byBusiness: true, staffMember: $this->selectedStaffMember);
         } catch (SlotUnavailableException $exception) {
             $this->startsAt = null;
             unset($this->availability);
@@ -120,9 +137,10 @@ class NewAppointment extends Component
 
         $this->open = false;
         $this->dispatch('appointment-created', date: $appointment->localStartsAt()->toDateString());
+        $with = $appointment->staffMember ? " con {$appointment->staffMember->firstName()}" : '';
         $this->notify($appointment->customer_email
-            ? 'Cita creada. Le enviamos la confirmación al cliente.'
-            : 'Cita creada.');
+            ? "Cita creada{$with}. Le enviamos la confirmación al cliente."
+            : "Cita creada{$with}.");
     }
 
     /**
@@ -138,6 +156,25 @@ class NewAppointment extends Component
     public function selectedService(): ?Service
     {
         return $this->services->firstWhere('id', $this->serviceId)?->setRelation('business', $this->business);
+    }
+
+    /**
+     * @return Collection<int, StaffMember>
+     */
+    #[Computed]
+    public function staffOptions(): Collection
+    {
+        if ($this->selectedService === null || ! $this->business->hasTeam()) {
+            return new Collection;
+        }
+
+        return app(AvailabilityService::class)->staffFor($this->selectedService);
+    }
+
+    #[Computed]
+    public function selectedStaffMember(): ?StaffMember
+    {
+        return $this->staffOptions->firstWhere('id', $this->staffMemberId);
     }
 
     /**
@@ -159,6 +196,7 @@ class NewAppointment extends Component
             $today,
             $today->addDays($this->business->booking_window_days),
             forBusiness: true,
+            staffMember: $this->selectedStaffMember,
         );
     }
 

@@ -8,8 +8,10 @@ use App\Exceptions\SlotUnavailableException;
 use App\Livewire\Concerns\ManagesBusiness;
 use App\Livewire\Concerns\ShowsNotices;
 use App\Models\Appointment;
+use App\Models\StaffMember;
 use App\Services\AppointmentBooker;
 use App\Services\AvailabilityService;
+use App\Support\CalendarLayout;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
@@ -38,6 +40,10 @@ class Agenda extends Component
     #[Url(as: 'estado', except: '')]
     public string $statusFilter = '';
 
+    /** Only show appointments of this staff member ('' shows everyone's). */
+    #[Url(as: 'equipo', except: '')]
+    public string $staffFilter = '';
+
     /** Appointment open in the side panel. */
     public ?int $openAppointmentId = null;
 
@@ -52,6 +58,7 @@ class Agenda extends Component
     public function mount(): void
     {
         $this->date = $this->parseDate($this->date)->toDateString();
+        $this->filterByStaff($this->staffFilter);
     }
 
     public function selectDate(string $date): void
@@ -86,7 +93,13 @@ class Agenda extends Component
     public function filterByStatus(string $status): void
     {
         $this->statusFilter = AppointmentStatus::tryFrom($status)?->value ?? '';
-        unset($this->visibleAppointments, $this->dayAppointments);
+        unset($this->visibleAppointments, $this->dayAppointments, $this->calendarLanes);
+    }
+
+    public function filterByStaff(string $staffMemberId): void
+    {
+        $this->staffFilter = (string) ($this->staffMembers->firstWhere('id', (int) $staffMemberId)?->id ?? '');
+        unset($this->visibleAppointments, $this->dayAppointments, $this->calendarLanes);
     }
 
     public function viewAppointment(int $appointmentId): void
@@ -218,7 +231,7 @@ class Agenda extends Component
         $business = $this->business;
 
         return $business->appointments()
-            ->with('service')
+            ->with('service', 'staffMember')
             ->where('starts_at', '>=', $this->weekDays[0]->utc())
             ->where('starts_at', '<', $this->weekDays[6]->addDay()->utc())
             ->orderBy('starts_at')
@@ -228,20 +241,46 @@ class Agenda extends Component
     }
 
     /**
-     * Week appointments after applying the status filter.
+     * Week appointments after applying the status and staff filters.
      *
      * @return \Illuminate\Support\Collection<string, Collection<int, Appointment>>
      */
     #[Computed]
     public function visibleAppointments(): \Illuminate\Support\Collection
     {
-        if ($this->statusFilter === '') {
+        if ($this->statusFilter === '' && $this->staffFilter === '') {
             return $this->weekAppointments;
         }
 
         return $this->weekAppointments
-            ->map(fn (Collection $day) => $day->filter(fn (Appointment $appointment) => $appointment->status->value === $this->statusFilter)->values())
+            ->map(fn (Collection $day) => $day->filter(fn (Appointment $appointment) => ($this->statusFilter === '' || $appointment->status->value === $this->statusFilter)
+                && ($this->staffFilter === '' || (string) $appointment->staff_member_id === $this->staffFilter))->values())
             ->filter(fn (Collection $day) => $day->isNotEmpty());
+    }
+
+    /**
+     * Lane of each visible appointment in its day column, so overlapping
+     * appointments (of different people) sit side by side.
+     *
+     * @return array<int, array{lane: int, lanes: int}>
+     */
+    #[Computed]
+    public function calendarLanes(): array
+    {
+        return $this->visibleAppointments
+            ->map(fn (Collection $day) => CalendarLayout::lanes($day))
+            ->reduce(fn (array $lanes, array $day) => $lanes + $day, []);
+    }
+
+    /**
+     * Everyone on the team, for the filter and the appointment details.
+     *
+     * @return Collection<int, StaffMember>
+     */
+    #[Computed]
+    public function staffMembers(): Collection
+    {
+        return $this->business->staffMembers()->orderByDesc('is_active')->orderBy('name')->get();
     }
 
     /**
@@ -257,7 +296,7 @@ class Agenda extends Component
     public function openAppointment(): ?Appointment
     {
         return $this->openAppointmentId
-            ? $this->business->appointments()->with('service', 'business')->find($this->openAppointmentId)
+            ? $this->business->appointments()->with('service', 'business', 'staffMember')->find($this->openAppointmentId)
             : null;
     }
 
@@ -333,7 +372,7 @@ class Agenda extends Component
     private function showDate(CarbonImmutable $date): void
     {
         $this->date = $date->toDateString();
-        unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->gridHours, $this->stats, $this->openAppointment);
+        unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->calendarLanes, $this->gridHours, $this->stats, $this->openAppointment);
     }
 
     /**
@@ -357,7 +396,7 @@ class Agenda extends Component
     private function findAppointment(int $appointmentId): Appointment
     {
         $appointment = $this->business->appointments()->with('service', 'business.owner')->findOrFail($appointmentId);
-        unset($this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->stats, $this->openAppointment);
+        unset($this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->calendarLanes, $this->stats, $this->openAppointment);
 
         return $appointment;
     }

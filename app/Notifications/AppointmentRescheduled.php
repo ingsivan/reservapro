@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Appointment;
+use App\Models\StaffMember;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -38,6 +39,7 @@ class AppointmentRescheduled extends Notification implements ShouldQueue
                 ->line("{$appointment->customer_name} movió su cita de {$appointment->service->name}.")
                 ->line("**Antes:** {$this->previousWhen}")
                 ->line("**Ahora:** {$appointment->whenLabel()}")
+                ->when($appointment->staffMember, fn (MailMessage $message, StaffMember $staffMember) => $message->line("**Con:** {$staffMember->name}"))
                 ->action('Ver la agenda', route('admin.agenda', ['date' => $appointment->localStartsAt()->toDateString()]));
         }
 
@@ -47,6 +49,7 @@ class AppointmentRescheduled extends Notification implements ShouldQueue
             ->line("{$appointment->business->name} movió tu cita de {$appointment->service->name}.")
             ->line("**Antes:** {$this->previousWhen}")
             ->line("**Ahora:** {$appointment->whenLabel()}")
+            ->when($appointment->staffMember, fn (MailMessage $message, StaffMember $staffMember) => $message->line("**Te atiende:** {$staffMember->name}"))
             ->action('Ver mi cita', $appointment->manageUrl())
             ->line('Si el nuevo horario no te funciona, desde ese enlace puedes elegir otro o cancelar.');
     }
