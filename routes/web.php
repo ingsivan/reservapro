@@ -19,6 +19,7 @@ Route::livewire('/reservar/{business}', BookingWizard::class)->name('booking');
 
 Route::middleware('signed')->group(function () {
     Route::get('/cita/{appointment}', [ManageAppointmentController::class, 'show'])->name('appointments.manage');
+    Route::get('/cita/{appointment}/calendario.ics', [ManageAppointmentController::class, 'calendar'])->name('appointments.calendar');
     Route::post('/cita/{appointment}/cancelar', [ManageAppointmentController::class, 'cancel'])->name('appointments.cancel');
 });
 

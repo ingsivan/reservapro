@@ -3,10 +3,25 @@
 @endphp
 
 <div class="max-w-3xl">
-    <h1 class="text-2xl font-bold text-slate-900">Ajustes</h1>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Ajustes</h1>
     <p class="text-sm text-slate-500">Datos públicos de tu negocio y reglas para las reservas.</p>
 
-    <x-notice :message="$notice" :error="$noticeIsError" class="mt-6" />
+    <section class="mt-6 flex flex-col gap-4 rounded-xl bg-linear-to-br from-teal-600 to-emerald-500 p-5 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between" x-data="{ copied: false }">
+        <div class="min-w-0">
+            <p class="flex items-center gap-2 text-sm font-medium text-teal-50"><x-icon name="link" class="size-4" /> Tu página de reservas</p>
+            <p class="mt-1 truncate font-semibold">{{ route('booking', $this->business) }}</p>
+        </div>
+        <div class="flex shrink-0 gap-2">
+            <button type="button" x-on:click="navigator.clipboard.writeText(@js(route('booking', $this->business))); copied = true; setTimeout(() => copied = false, 2000)"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/25">
+                <x-icon name="copy" class="size-4" /> <span x-text="copied ? '¡Copiado!' : 'Copiar enlace'">Copiar enlace</span>
+            </button>
+            <a href="{{ route('booking', $this->business) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">
+                <x-icon name="external" class="size-4" /> Abrir
+            </a>
+        </div>
+    </section>
+
 
     <form wire:submit="save" class="mt-6 space-y-6">
         <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -64,7 +79,7 @@
                 <x-field name="bookingWindowDays" type="number" label="Se puede reservar hasta (días)" wire:model="bookingWindowDays" min="1" max="180" />
                 <x-field name="cancellationNoticeHours" type="number" label="Cancelación en línea hasta (horas antes)" wire:model="cancellationNoticeHours" min="0" max="168" />
                 <label class="flex items-start gap-3 rounded-lg border border-slate-200 p-3 text-sm sm:col-span-2">
-                    <input type="checkbox" wire:model="requiresConfirmation" class="mt-0.5 rounded border-slate-300 text-teal-600">
+                    <input type="checkbox" wire:model="requiresConfirmation" class="mt-0.5 size-4 rounded border-slate-300 accent-teal-600">
                     <span>
                         <span class="font-medium text-slate-900">Confirmar cada cita manualmente</span>
                         <span class="block text-slate-500">Las reservas quedan «por confirmar» hasta que las apruebes. Mientras tanto, el horario queda apartado.</span>

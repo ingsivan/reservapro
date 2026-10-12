@@ -49,6 +49,31 @@ class BookingWizardTest extends TestCase
     }
 
     #[Test]
+    public function the_wizard_moves_through_the_steps_and_back(): void
+    {
+        Livewire::test(BookingWizard::class, ['business' => $this->business])
+            ->assertSet('step', 1)
+            ->call('goToStep', 3)
+            ->assertSet('step', 1)
+            ->call('selectService', $this->service->id)
+            ->assertSet('step', 2)
+            ->assertSee('Mañana')
+            ->call('goToStep', 3)
+            ->assertSet('step', 2)
+            ->call('selectDate', '2026-10-13')
+            ->call('selectSlot', $this->slot)
+            ->assertSet('step', 3)
+            ->call('goToStep', 1)
+            ->assertSet('step', 1)
+            ->assertSet('startsAt', $this->slot)
+            ->call('goToStep', 3)
+            ->assertSet('step', 3)
+            ->call('changeSlot')
+            ->assertSet('step', 2)
+            ->assertSet('startsAt', null);
+    }
+
+    #[Test]
     public function an_unknown_business_returns_404(): void
     {
         $this->get('/reservar/no-existe')->assertNotFound();

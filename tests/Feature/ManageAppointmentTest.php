@@ -36,6 +36,24 @@ class ManageAppointmentTest extends TestCase
     }
 
     #[Test]
+    public function the_appointment_can_be_added_to_a_calendar(): void
+    {
+        $appointment = Appointment::factory()
+            ->at(CarbonImmutable::parse('2026-10-13 16:00:00', 'UTC'))
+            ->create();
+
+        $response = $this->get($appointment->calendarFileUrl())->assertOk();
+
+        $this->assertStringStartsWith('text/calendar', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString("cita-{$appointment->code}.ics", $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString("DTSTART:20261013T160000Z\r\n", $response->getContent());
+        $this->assertStringContainsString("UID:{$appointment->code}@reservapro", $response->getContent());
+
+        $this->assertStringContainsString('dates=20261013T160000Z', $appointment->googleCalendarUrl());
+        $this->get(route('appointments.calendar', $appointment))->assertForbidden();
+    }
+
+    #[Test]
     public function the_link_does_not_work_without_a_valid_signature(): void
     {
         $appointment = Appointment::factory()->create();

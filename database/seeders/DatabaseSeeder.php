@@ -141,8 +141,10 @@ class DatabaseSeeder extends Seeder
     {
         $name = $client?->name ?? self::CUSTOMERS[array_rand(self::CUSTOMERS)];
         $status = $this->randomStatus($start->lt($now));
+        $bookedAt = $start->subDays(random_int(2, 6))->min($now->subHours(random_int(1, 48)));
+        $cancelledAt = $start->subHours(3)->min($now->subMinutes(30))->max($bookedAt->addHour());
 
-        $business->appointments()->create([
+        $appointment = $business->appointments()->create([
             'service_id' => $service->id,
             'user_id' => $client?->id,
             'customer_name' => $name,
@@ -153,10 +155,12 @@ class DatabaseSeeder extends Seeder
             'ends_at' => $start->addMinutes($service->duration_minutes)->utc(),
             'status' => $status,
             'price_cents' => $service->price_cents,
-            'confirmed_at' => $status === AppointmentStatus::Pending ? null : $start->subDays(2)->utc(),
-            'cancelled_at' => $status === AppointmentStatus::Cancelled ? $start->subDay()->utc() : null,
+            'confirmed_at' => $status === AppointmentStatus::Pending ? null : $bookedAt->addMinutes(20)->utc(),
+            'cancelled_at' => $status === AppointmentStatus::Cancelled ? $cancelledAt->utc() : null,
             'cancelled_by' => $status === AppointmentStatus::Cancelled ? CancelledBy::Customer : null,
         ]);
+
+        $appointment->forceFill(['created_at' => $bookedAt->utc(), 'updated_at' => $bookedAt->utc()])->saveQuietly();
     }
 
     private function randomStatus(bool $isPast): AppointmentStatus

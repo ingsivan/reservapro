@@ -1,22 +1,32 @@
 <div class="mx-auto max-w-3xl">
-    <h1 class="text-2xl font-bold text-slate-900">Mis citas</h1>
-
-    <x-notice :message="$notice" :error="$noticeIsError" class="mt-4" />
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Mis citas</h1>
 
     <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Próximas</h2>
     <div class="mt-3 space-y-3">
         @forelse ($this->upcoming as $appointment)
-            <div wire:key="upcoming-{{ $appointment->id }}" class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <p class="font-semibold text-slate-900">{{ $appointment->service->name }}</p>
-                        <x-status-badge :status="$appointment->status" />
+            <div wire:key="upcoming-{{ $appointment->id }}" class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex w-14 shrink-0 flex-col items-center rounded-xl bg-teal-50 py-1.5 ring-1 ring-teal-600/10">
+                        <span class="text-xs font-semibold text-teal-700 uppercase">{{ rtrim($appointment->localStartsAt()->translatedFormat('M'), '.') }}</span>
+                        <span class="text-xl leading-6 font-bold text-slate-900">{{ $appointment->localStartsAt()->day }}</span>
                     </div>
-                    <p class="text-sm text-slate-600">{{ $appointment->business->name }}</p>
-                    <p class="text-sm text-slate-600 first-letter:uppercase">{{ $appointment->whenLabel() }}</p>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="font-semibold text-slate-900">{{ $appointment->service->name }}</p>
+                            <x-status-badge :status="$appointment->status" />
+                        </div>
+                        <p class="text-sm text-slate-600">{{ $appointment->business->name }}</p>
+                        <p class="text-sm text-slate-600 first-letter:uppercase">{{ $appointment->whenLabel() }}</p>
+                    </div>
                 </div>
                 @if ($appointment->canBeCancelledByCustomer())
-                    <button type="button" wire:click="cancel({{ $appointment->id }})" wire:confirm="¿Seguro que quieres cancelar esta cita?"
+                    <button type="button"
+                            x-on:click="$dispatch('confirm-action', {
+                                title: '¿Cancelar esta cita?',
+                                message: 'Liberaremos el horario y le avisaremos al negocio.',
+                                confirmLabel: 'Sí, cancelar',
+                                action: () => $wire.cancel({{ $appointment->id }}),
+                            })"
                             class="self-start rounded-lg border border-rose-300 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-50 sm:self-auto">Cancelar</button>
                 @endif
             </div>

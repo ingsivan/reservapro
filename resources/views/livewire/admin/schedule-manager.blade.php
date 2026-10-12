@@ -1,8 +1,11 @@
-<div>
-    <h1 class="text-2xl font-bold text-slate-900">Horario</h1>
-    <p class="text-sm text-slate-500">Los clientes solo ven horarios libres dentro de estas horas. Zona horaria: {{ $this->business->timezone }}.</p>
+@php
+    $minutesOf = fn (string $time) => (int) substr($time, 0, 2) * 60 + (int) substr($time, 3, 2);
+@endphp
 
-    <x-notice :message="$notice" :error="$noticeIsError" class="mt-6" />
+<div>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Horario</h1>
+    <p class="text-sm text-slate-500">Los clientes solo ven horarios libres dentro de estas horas. Zona horaria: {{ str_replace('_', ' ', $this->business->timezone) }}.</p>
+
 
     <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_22rem]">
         <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -11,18 +14,29 @@
                 @foreach ($this->schedulesByDay as $row)
                     <li wire:key="day-{{ $row['day'] }}" class="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center">
                         <span class="w-28 shrink-0 text-sm font-medium text-slate-700">{{ $row['name'] }}</span>
-                        <div class="flex flex-wrap gap-2">
-                            @forelse ($row['windows'] as $window)
-                                <span wire:key="window-{{ $window->id }}" class="inline-flex items-center gap-1 rounded-full bg-teal-50 py-1 pr-1 pl-3 text-sm text-teal-900 ring-1 ring-teal-600/20">
-                                    {{ $window->label() }}
-                                    @if ($window->crossesMidnight())
-                                        <span class="text-xs text-teal-700">(+1 día)</span>
-                                    @endif
-                                    <button type="button" wire:click="removeWindow({{ $window->id }})" class="flex size-5 items-center justify-center rounded-full text-teal-700 hover:bg-teal-100" aria-label="Quitar {{ $window->label() }} del {{ $row['name'] }}">×</button>
-                                </span>
-                            @empty
-                                <span class="text-sm text-slate-400">Cerrado</span>
-                            @endforelse
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap gap-2">
+                                @forelse ($row['windows'] as $window)
+                                    <span wire:key="window-{{ $window->id }}" class="inline-flex items-center gap-1 rounded-full bg-teal-50 py-1 pr-1 pl-3 text-sm text-teal-900 ring-1 ring-teal-600/20">
+                                        {{ $window->label() }}
+                                        @if ($window->crossesMidnight())
+                                            <span class="text-xs text-teal-700">(+1 día)</span>
+                                        @endif
+                                        <button type="button" wire:click="removeWindow({{ $window->id }})" class="flex size-5 items-center justify-center rounded-full text-teal-700 hover:bg-teal-100" aria-label="Quitar {{ $window->label() }} del {{ $row['name'] }}"><x-icon name="x" class="size-3.5" /></button>
+                                    </span>
+                                @empty
+                                    <span class="text-sm text-slate-400">Cerrado</span>
+                                @endforelse
+                            </div>
+                            <div class="relative mt-2 h-1.5 rounded-full bg-slate-100" aria-hidden="true">
+                                @foreach ($row['windows'] as $window)
+                                    @php
+                                        $opens = $minutesOf($window->opensAtTime());
+                                        $closes = $window->crossesMidnight() ? 1440 : $minutesOf($window->closesAtTime());
+                                    @endphp
+                                    <span class="absolute inset-y-0 rounded-full bg-teal-500" style="left: {{ $opens / 14.4 }}%; width: {{ ($closes - $opens) / 14.4 }}%"></span>
+                                @endforeach
+                            </div>
                         </div>
                     </li>
                 @endforeach

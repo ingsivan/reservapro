@@ -90,6 +90,39 @@ class AdminPanelTest extends TestCase
     }
 
     #[Test]
+    public function the_owner_opens_an_appointment_and_filters_by_status(): void
+    {
+        $pending = Appointment::factory()->pending()->for($this->serviceWithBusiness())->for($this->business)
+            ->at(CarbonImmutable::parse('2026-10-12 10:00', 'America/Mexico_City')->utc())
+            ->create(['customer_name' => 'Ana López', 'notes' => 'Llego cinco minutos tarde']);
+        Appointment::factory()->for($this->serviceWithBusiness())->for($this->business)
+            ->at(CarbonImmutable::parse('2026-10-12 12:00', 'America/Mexico_City')->utc())
+            ->create(['customer_name' => 'Bruno Díaz']);
+
+        Livewire::actingAs($this->owner)
+            ->test(Agenda::class)
+            ->call('viewAppointment', $pending->id)
+            ->assertSee('Llego cinco minutos tarde')
+            ->assertSee($pending->code)
+            ->call('closeAppointment')
+            ->assertSet('openAppointmentId', null)
+            ->call('filterByStatus', 'pending')
+            ->assertSee('Ana López')
+            ->assertDontSee('Bruno Díaz')
+            ->call('filterByStatus', 'no-existe')
+            ->assertSet('statusFilter', '')
+            ->assertSee('Bruno Díaz');
+    }
+
+    #[Test]
+    public function the_owner_cannot_open_appointments_of_other_businesses(): void
+    {
+        $foreign = Appointment::factory()->create();
+
+        Livewire::actingAs($this->owner)->test(Agenda::class)->call('viewAppointment', $foreign->id)->assertNotFound();
+    }
+
+    #[Test]
     public function the_owner_confirms_and_cancels_appointments(): void
     {
         $pending = Appointment::factory()->pending()->for($this->serviceWithBusiness())->for($this->business)->create();

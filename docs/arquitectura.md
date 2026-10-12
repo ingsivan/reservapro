@@ -97,7 +97,8 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 | `App\Livewire\Admin\Agenda` | Calendario semanal, lista del día, estadísticas y acciones sobre las citas. |
 | `App\Livewire\Admin\Services`, `ScheduleManager`, `BusinessSettings` | Catálogo, horario semanal y días cerrados, y ajustes del negocio. |
 | `App\Livewire\MyAppointments` | Citas del cliente con cuenta. |
-| `App\Http\Controllers\ManageAppointmentController` | Ver y cancelar una cita desde el enlace firmado del correo. |
+| `App\Http\Controllers\ManageAppointmentController` | Ver y cancelar una cita desde el enlace firmado del correo, y descargarla como `.ics`. |
+| `resources/views/components` | Piezas de interfaz compartidas: iconos (`x-icon`), avisos tipo toast (`x-toaster`), ventana de confirmación (`x-confirm-dialog`) y acciones de una cita en el panel. |
 | `App\Console\Commands\SendAppointmentReminders` | Recordatorio por correo 24 horas antes (cada 15 minutos con el Scheduler). |
 
 ## Pruebas

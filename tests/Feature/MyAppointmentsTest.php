@@ -30,7 +30,7 @@ class MyAppointmentsTest extends TestCase
             ->assertSee($mine->service->name)
             ->assertDontSee('Otra persona')
             ->call('cancel', $mine->id)
-            ->assertSee('Cancelaste tu cita');
+            ->assertDispatched('toast', message: 'Cancelaste tu cita. El negocio ya fue avisado.', type: 'success');
 
         $this->assertSame(AppointmentStatus::Cancelled, $mine->fresh()->status);
     }

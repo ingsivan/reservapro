@@ -14,14 +14,17 @@
 
 ## Funciones
 
-- **Reserva pública en tres pasos**, sin crear cuenta: servicio → día y hora → datos. Solo se muestran horarios que de verdad están libres.
+- **Reserva pública en tres pasos**, sin crear cuenta: servicio → día y hora → datos, con barra de progreso y un resumen que acompaña toda la reserva (en el celular, una barra inferior con el botón para confirmar). Solo se muestran horarios que de verdad están libres, agrupados en mañana, tarde y noche.
+- **Página del negocio** con portada, aviso de "Abierto ahora" o "Cerrado · abre mañana a las 10:00" y horario resumido (Lun – Vie en una sola línea).
+- **Agregar al calendario:** al reservar, la cita se puede guardar en Google Calendar o descargar como `.ics` para Apple Calendar u Outlook.
 - **Cero dobles reservas:** cada reserva se guarda en una transacción con bloqueo de fila y la disponibilidad se vuelve a verificar en el servidor.
 - **Horarios flexibles:** varios turnos por día, turnos que cruzan la medianoche, días cerrados, intervalo entre horarios, anticipación mínima y días máximos hacia adelante.
 - **Zonas horarias reales:** cada negocio tiene la suya; las citas se guardan en UTC y respetan el horario de verano.
 - **Correos automáticos:** confirmación al cliente, aviso al negocio, recordatorio 24 horas antes y avisos de cancelación, enviados por la cola.
 - **Cancelación con enlace firmado:** el cliente cancela desde el correo, sin cuenta, dentro del plazo que defina el negocio.
 - **Confirmación manual opcional:** las citas pueden quedar "por confirmar" hasta que el negocio las apruebe.
-- **Panel del administrador:** agenda semanal tipo calendario, estadísticas de la semana, CRUD de servicios, horario semanal, días bloqueados y ajustes.
+- **Panel del administrador:** menú lateral, agenda semanal tipo calendario con línea de la hora actual, filtros por estado y un panel lateral con el detalle de cada cita; estadísticas de la semana, servicios con interruptor de visible/oculto, horario semanal, días bloqueados y ajustes.
+- **Interfaz cuidada:** avisos tipo toast, ventana propia para confirmar acciones que no se pueden deshacer, estados de carga y diseño adaptado al celular.
 - **Cuentas de cliente:** quien se registra ve sus citas en "Mis citas" y puede cancelarlas.
 - **Negocio demo** con dos semanas de citas alrededor de la fecha actual.
 
@@ -29,9 +32,13 @@
 |---------|--------------|---------------|
 | ![Página de reserva](docs/screenshots/booking.png) | ![Cita confirmada](docs/screenshots/booked.png) | ![Reserva en móvil](docs/screenshots/booking-mobile.png) |
 
-| Inicio | Servicios | Horario |
-|--------|-----------|---------|
-| ![Inicio](docs/screenshots/home.png) | ![Servicios](docs/screenshots/services.png) | ![Horario y días cerrados](docs/screenshots/schedule.png) |
+| Inicio | Detalle de una cita | Servicios |
+|--------|---------------------|-----------|
+| ![Inicio](docs/screenshots/home.png) | ![Panel lateral con el detalle de la cita](docs/screenshots/appointment.png) | ![Servicios](docs/screenshots/services.png) |
+
+| Horario | Ajustes |
+|---------|---------|
+| ![Horario y días cerrados](docs/screenshots/schedule.png) | ![Ajustes del negocio](docs/screenshots/settings.png) |
 
 ## Stack
 
@@ -41,7 +48,7 @@
 | Frontend | Livewire 4 (con Alpine), Blade, Tailwind CSS 4, Vite |
 | Base de datos | SQLite en local y en la demo; MySQL o PostgreSQL en producción |
 | Trabajo en segundo plano | Colas (correos) y Scheduler (recordatorios) de Laravel |
-| Pruebas | PHPUnit (81 tests), Pint |
+| Pruebas | PHPUnit (90 tests), Pint |
 | CI/CD | GitHub Actions, Docker, Render |
 
 La única dependencia además de Laravel es Livewire. El calendario de la agenda está hecho con Tailwind, sin librerías de JavaScript.
@@ -73,7 +80,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 81 tests
+php artisan test        # 90 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
