@@ -37,6 +37,10 @@
                 <button type="button" wire:click="goToToday" class="border-x border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Hoy</button>
                 <button type="button" wire:click="nextWeek" class="px-2.5 py-2 text-slate-600 hover:bg-slate-50" aria-label="Semana siguiente"><x-icon name="chevron-right" class="size-4" /></button>
             </div>
+            <button type="button" x-on:click="$dispatch('new-appointment', { date: @js($date) })"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 sm:px-4">
+                <x-icon name="plus" class="size-4" /> <span class="max-[400px]:sr-only">Nueva cita</span>
+            </button>
         </div>
     </div>
 
@@ -182,11 +186,16 @@
                 <div class="flex flex-col items-center px-6 py-10 text-center">
                     <span class="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400"><x-icon name="calendar" class="size-6" /></span>
                     <p class="mt-3 font-medium text-slate-900">{{ $statusFilter ? 'No hay citas con ese estado este día' : 'No hay citas este día' }}</p>
-                    <p class="mt-1 text-sm text-slate-500">Comparte tu página de reservas para recibir más citas.</p>
+                    <p class="mt-1 text-sm text-slate-500">Comparte tu página de reservas o agenda una cita por teléfono.</p>
+                    <button type="button" x-on:click="$dispatch('new-appointment', { date: @js($date) })" class="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        <x-icon name="plus" class="size-4" /> Agendar en este día
+                    </button>
                 </div>
             @endforelse
         </div>
     </section>
+
+    <livewire:admin.new-appointment />
 
     {{-- Appointment side panel --}}
     @if ($appointment = $this->openAppointment)
@@ -247,7 +256,11 @@
                             <x-icon name="mail" class="mt-0.5 size-5 text-slate-400" />
                             <div class="min-w-0">
                                 <dt class="sr-only">Correo</dt>
-                                <dd><a href="mailto:{{ $appointment->customer_email }}" class="break-all font-medium text-teal-700 hover:underline">{{ $appointment->customer_email }}</a></dd>
+                                @if ($appointment->customer_email)
+                                    <dd><a href="mailto:{{ $appointment->customer_email }}" class="break-all font-medium text-teal-700 hover:underline">{{ $appointment->customer_email }}</a></dd>
+                                @else
+                                    <dd class="text-slate-500">Sin correo: avísale por teléfono si cambias o cancelas la cita.</dd>
+                                @endif
                             </div>
                         </div>
                         @if ($appointment->customer_phone)

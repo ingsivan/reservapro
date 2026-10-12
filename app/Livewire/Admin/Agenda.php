@@ -17,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -71,6 +72,15 @@ class Agenda extends Component
     public function goToToday(): void
     {
         $this->showDate($this->business->now());
+    }
+
+    /**
+     * Show the day of an appointment just created in the new-appointment panel.
+     */
+    #[On('appointment-created')]
+    public function showCreatedAppointment(string $date): void
+    {
+        $this->showDate($this->parseDate($date));
     }
 
     public function filterByStatus(string $status): void
@@ -153,19 +163,21 @@ class Agenda extends Component
 
         $this->stopRescheduling();
         $this->showDate($appointment->localStartsAt());
-        $this->notify('Cita reprogramada. Le avisamos al cliente por correo.');
+        $this->notify('Cita reprogramada.'.$this->customerNotice($appointment));
     }
 
     public function confirm(int $appointmentId, AppointmentBooker $booker): void
     {
-        $booker->confirm($this->findAppointment($appointmentId));
-        $this->notify('Cita confirmada. Le avisamos al cliente por correo.');
+        $appointment = $this->findAppointment($appointmentId);
+        $booker->confirm($appointment);
+        $this->notify('Cita confirmada.'.$this->customerNotice($appointment));
     }
 
     public function cancel(int $appointmentId, AppointmentBooker $booker): void
     {
-        $booker->cancel($this->findAppointment($appointmentId), CancelledBy::Business);
-        $this->notify('Cita cancelada. Le avisamos al cliente por correo.');
+        $appointment = $this->findAppointment($appointmentId);
+        $booker->cancel($appointment, CancelledBy::Business);
+        $this->notify('Cita cancelada.'.$this->customerNotice($appointment));
     }
 
     public function markCompleted(int $appointmentId): void
@@ -259,7 +271,7 @@ class Agenda extends Component
     {
         $appointment = $this->openAppointment;
 
-        return $appointment ? app(AvailabilityService::class)->slotsToReschedule($appointment) : [];
+        return $appointment ? app(AvailabilityService::class)->slotsToReschedule($appointment, forBusiness: true) : [];
     }
 
     /**
@@ -322,6 +334,14 @@ class Agenda extends Component
     {
         $this->date = $date->toDateString();
         unset($this->selectedDate, $this->weekDays, $this->weekAppointments, $this->visibleAppointments, $this->dayAppointments, $this->gridHours, $this->stats, $this->openAppointment);
+    }
+
+    /**
+     * Ending for a toast, depending on whether the customer gets an email.
+     */
+    private function customerNotice(Appointment $appointment): string
+    {
+        return $appointment->customer_email ? ' Le avisamos al cliente por correo.' : '';
     }
 
     private function markPast(int $appointmentId, AppointmentStatus $status): void

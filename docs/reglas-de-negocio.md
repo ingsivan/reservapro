@@ -27,7 +27,7 @@ stateDiagram-v2
 
 | Acción | Cliente sin cuenta | Cliente con cuenta | Dueño del negocio |
 |--------|--------------------|--------------------|-------------------|
-| Reservar | Sí | Sí (sus datos se llenan solos) | Desde la página pública |
+| Reservar | Sí | Sí (sus datos se llenan solos) | Desde la agenda, para cualquier cliente |
 | Ver su cita | Con el enlace del correo | En "Mis citas" y con el enlace | En la agenda |
 | Cambiar el horario | Hasta N horas antes | Hasta N horas antes | Siempre que no haya empezado |
 | Cancelar | Hasta N horas antes | Hasta N horas antes | Siempre que no haya empezado |
@@ -35,6 +35,13 @@ stateDiagram-v2
 | Marcar atendida / no asistió | No | No | Sí, cuando ya empezó |
 
 N es el "aviso para cancelar" que define cada negocio (2 horas en la demo).
+
+Cuando el negocio agenda o mueve una cita desde la agenda:
+
+- No aplica la anticipación mínima (solo se ocultan las horas que ya pasaron), para atender a quien llega sin cita.
+- Las citas que agenda nacen confirmadas aunque esté encendido "Confirmar cada cita manualmente".
+- El correo del cliente es opcional. Sin correo, no se envía confirmación, recordatorio ni avisos.
+- Al dueño no le llega el aviso de "nueva cita", porque la creó él.
 
 Al cambiar el horario de una cita:
 

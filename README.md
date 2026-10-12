@@ -23,6 +23,7 @@
 - **Correos automáticos:** confirmación al cliente, aviso al negocio, recordatorio 24 horas antes y avisos de cancelación, enviados por la cola.
 - **Cambiar o cancelar con enlace firmado:** desde el correo y sin cuenta, el cliente elige otro horario o cancela, dentro del plazo que defina el negocio.
 - **Reprogramar desde la agenda:** el negocio mueve una cita a otro horario libre y el cliente recibe un correo con el antes y el después.
+- **Citas por teléfono o sin cita:** desde la agenda, el negocio agenda una cita confirmada al momento; el correo del cliente es opcional.
 - **Confirmación manual opcional:** las citas pueden quedar "por confirmar" hasta que el negocio las apruebe.
 - **Panel del administrador:** menú lateral, agenda semanal tipo calendario con línea de la hora actual, filtros por estado y un panel lateral con el detalle de cada cita; estadísticas de la semana, servicios con interruptor de visible/oculto, horario semanal, días bloqueados y ajustes.
 - **Interfaz cuidada:** avisos tipo toast, ventana propia para confirmar acciones que no se pueden deshacer, estados de carga y diseño adaptado al celular.
@@ -49,7 +50,7 @@
 | Frontend | Livewire 4 (con Alpine), Blade, Tailwind CSS 4, Vite |
 | Base de datos | SQLite en local y en la demo; MySQL o PostgreSQL en producción |
 | Trabajo en segundo plano | Colas (correos) y Scheduler (recordatorios) de Laravel |
-| Pruebas | PHPUnit (107 tests), Pint |
+| Pruebas | PHPUnit (114 tests), Pint |
 | CI/CD | GitHub Actions, Docker, Render |
 
 La única dependencia además de Laravel es Livewire. El calendario de la agenda está hecho con Tailwind, sin librerías de JavaScript.
@@ -81,7 +82,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 107 tests
+php artisan test        # 114 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
@@ -110,7 +111,7 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Agregar la cita a Google Calendar o como `.ics`
 - [x] Recuperar contraseña
 - [x] Reprogramar citas, desde el enlace del cliente y desde la agenda
-- [ ] Crear citas desde el panel
+- [x] Crear citas desde el panel, para llamadas y clientes sin cita
 - [ ] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp

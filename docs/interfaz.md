@@ -101,6 +101,7 @@ stateDiagram-v2
   - Lista de citas del día seleccionado.
   - Al hacer clic en una cita se abre un panel lateral con sus datos y acciones; se cierra con Esc o al hacer clic fuera.
   - **Reprogramar** cambia el contenido del panel por el selector de día y hora, sin salir de la agenda.
+  - **Nueva cita** abre otro panel lateral con servicio, selector de día y hora y los datos del cliente. Se abre con el evento `new-appointment` (`$dispatch('new-appointment', { date })`).
   - El filtro queda en la URL (`?estado=pending`).
 - **Servicios:** tarjetas con un interruptor Visible / Oculto; el formulario se abre en una ventana.
 - **Horario:** ventanas por día con una barra que las dibuja sobre las 24 horas.

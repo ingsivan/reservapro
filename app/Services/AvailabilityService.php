@@ -34,11 +34,13 @@ class AvailabilityService
     /**
      * Free start times for every day in a range, keyed by date (Y-m-d).
      *
-     * Pass $ignoring when moving an appointment, so its current time counts as free.
+     * Pass $ignoring when moving an appointment, so its current time counts as
+     * free. The business itself books on behalf of customers, so with
+     * $forBusiness the minimum notice doesn't apply (only past times are hidden).
      *
      * @return array<string, list<CarbonImmutable>>
      */
-    public function slotsBetween(Service $service, CarbonImmutable|string $from, CarbonImmutable|string $to, ?Appointment $ignoring = null): array
+    public function slotsBetween(Service $service, CarbonImmutable|string $from, CarbonImmutable|string $to, ?Appointment $ignoring = null, bool $forBusiness = false): array
     {
         $business = $service->business;
         $from = $this->localDay($business, $from);
@@ -61,7 +63,7 @@ class AvailabilityService
 
         $today = $business->now()->startOfDay();
         $lastBookableDay = $today->addDays($business->booking_window_days);
-        $earliestStart = $business->now()->addMinutes($business->min_notice_minutes);
+        $earliestStart = $forBusiness ? $business->now() : $business->now()->addMinutes($business->min_notice_minutes);
 
         $slots = [];
 
@@ -115,7 +117,7 @@ class AvailabilityService
      *
      * @return array<string, list<CarbonImmutable>>
      */
-    public function slotsToReschedule(Appointment $appointment): array
+    public function slotsToReschedule(Appointment $appointment, bool $forBusiness = false): array
     {
         $business = $appointment->business;
         $service = $appointment->service->setRelation('business', $business);
@@ -124,20 +126,20 @@ class AvailabilityService
 
         return array_map(
             fn (array $slots) => array_values(array_filter($slots, fn (CarbonImmutable $start) => $start->getTimestamp() !== $currentStart)),
-            $this->slotsBetween($service, $today, $today->addDays($business->booking_window_days), $appointment),
+            $this->slotsBetween($service, $today, $today->addDays($business->booking_window_days), $appointment, $forBusiness),
         );
     }
 
     /**
      * Whether the exact start time is still bookable for the service.
      */
-    public function isAvailable(Service $service, CarbonImmutable $start, ?Appointment $ignoring = null): bool
+    public function isAvailable(Service $service, CarbonImmutable $start, ?Appointment $ignoring = null, bool $forBusiness = false): bool
     {
         $local = $start->setTimezone($service->business->timezone);
         $day = $local->startOfDay();
 
         // The slot may belong to the previous day's overnight window.
-        return collect($this->slotsBetween($service, $day->subDay(), $day, $ignoring))
+        return collect($this->slotsBetween($service, $day->subDay(), $day, $ignoring, $forBusiness))
             ->flatten()
             ->contains(fn (CarbonImmutable $slot) => $slot->getTimestamp() === $local->getTimestamp());
     }

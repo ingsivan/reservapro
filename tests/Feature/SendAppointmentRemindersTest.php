@@ -23,6 +23,7 @@ class SendAppointmentRemindersTest extends TestCase
         Appointment::factory()->cancelled()->at(now()->addHours(10))->create(['created_at' => now()->subDays(3)]);
         Appointment::factory()->pending()->at(now()->addHours(10))->create(['created_at' => now()->subDays(3)]);
         Appointment::factory()->at(now()->addHours(5))->create(['created_at' => now()->subMinutes(10)]);
+        Appointment::factory()->at(now()->addHours(8))->create(['created_at' => now()->subDays(3), 'customer_email' => null]);
 
         $this->artisan('appointments:send-reminders')->expectsOutput('Recordatorios enviados: 1')->assertSuccessful();
         $this->artisan('appointments:send-reminders')->expectsOutput('Recordatorios enviados: 0');
