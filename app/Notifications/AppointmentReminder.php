@@ -38,6 +38,6 @@ class AppointmentReminder extends Notification implements ShouldQueue
             $message->line("**Dirección:** {$business->address}");
         }
 
-        return $message->action('Ver o cancelar mi cita', $appointment->manageUrl());
+        return $message->action('Ver, cambiar o cancelar mi cita', $appointment->manageUrl());
     }
 }

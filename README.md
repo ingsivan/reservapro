@@ -20,7 +20,7 @@
 - **Cero dobles reservas:** cada reserva se guarda en una transacción con bloqueo de fila y la disponibilidad se vuelve a verificar en el servidor.
 - **Horarios flexibles:** varios turnos por día, turnos que cruzan la medianoche, días cerrados, intervalo entre horarios, anticipación mínima y días máximos hacia adelante.
 - **Zonas horarias reales:** cada negocio tiene la suya; las citas se guardan en UTC y respetan el horario de verano.
-- **Correos automáticos:** confirmación al cliente, aviso al negocio, recordatorio 24 horas antes y avisos de cancelación, enviados por la cola.
+- **Correos automáticos con la marca:** confirmación al cliente, aviso al negocio, recordatorio 24 horas antes y avisos de cambio y cancelación, en español y con los colores de ReservaPro, enviados por la cola.
 - **Cambiar o cancelar con enlace firmado:** desde el correo y sin cuenta, el cliente elige otro horario o cancela, dentro del plazo que defina el negocio.
 - **Reprogramar desde la agenda:** el negocio mueve una cita a otro horario libre y el cliente recibe un correo con el antes y el después.
 - **Citas por teléfono o sin cita:** desde la agenda, el negocio agenda una cita confirmada al momento; el correo del cliente es opcional.
@@ -42,6 +42,10 @@
 |---------|---------|-----------------|
 | ![Horario y días cerrados](docs/screenshots/schedule.png) | ![Ajustes del negocio](docs/screenshots/settings.png) | ![El cliente elige otro horario](docs/screenshots/reschedule.png) |
 
+| Correo de confirmación |
+|------------------------|
+| ![Correo con la marca de ReservaPro](docs/screenshots/email.png) |
+
 ## Stack
 
 | Capa | Tecnología |
@@ -50,7 +54,7 @@
 | Frontend | Livewire 4 (con Alpine), Blade, Tailwind CSS 4, Vite |
 | Base de datos | SQLite en local y en la demo; MySQL o PostgreSQL en producción |
 | Trabajo en segundo plano | Colas (correos) y Scheduler (recordatorios) de Laravel |
-| Pruebas | PHPUnit (114 tests), Pint |
+| Pruebas | PHPUnit (116 tests), Pint |
 | CI/CD | GitHub Actions, Docker, Render |
 
 La única dependencia además de Laravel es Livewire. El calendario de la agenda está hecho con Tailwind, sin librerías de JavaScript.
@@ -82,7 +86,7 @@ Los correos se escriben en `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 ## Pruebas
 
 ```bash
-php artisan test        # 114 tests
+php artisan test        # 116 tests
 vendor/bin/pint --test  # estilo de código
 ```
 
@@ -112,6 +116,7 @@ Los tests fijan la fecha con `travelTo()` y cubren los casos difíciles: turnos 
 - [x] Recuperar contraseña
 - [x] Reprogramar citas, desde el enlace del cliente y desde la agenda
 - [x] Crear citas desde el panel, para llamadas y clientes sin cita
+- [x] Correos con la marca de ReservaPro, todo en español
 - [ ] Varios empleados por negocio, cada uno con su agenda
 - [ ] Pagos en línea o anticipo al reservar
 - [ ] Recordatorios por WhatsApp

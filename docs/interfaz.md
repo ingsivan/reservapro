@@ -114,6 +114,17 @@ stateDiagram-v2
 - **Mis citas:** próximas con su fecha destacada y anteriores en una lista compacta.
 - **Entrar:** muestra las cuentas de prueba; al pulsar una, se llenan los campos. Enlaza a **Recuperar contraseña**.
 
+## Correos
+
+Las plantillas publicadas están en `resources/views/vendor`:
+
+- `mail/html/header.blade.php`: logo (un cuadro turquesa con una palomita, hecho con HTML para que se vea aunque el correo bloquee imágenes) y el nombre.
+- `mail/html/themes/default.css`: colores de la marca. El botón principal es `#0d9488` (`teal-600`) y los textos usan la escala `slate`.
+- `mail/html/message.blade.php` y `mail/text/message.blade.php`: pie de página en español.
+- `notifications/email.blade.php`: saludo, despedida y el texto de "si el botón no funciona" en español.
+
+Las demás piezas (botón, panel, tabla) se toman de Laravel. Para ver un correo sin enviarlo, en Tinker: `(new AppointmentBooked($cita))->toMail(new AnonymousNotifiable)->render()`.
+
 ## Accesibilidad
 
 - Los pasos usan `aria-current="step"`; los días, `role="listbox"` y `aria-selected`; el interruptor de servicios, `role="switch"` y `aria-checked`.

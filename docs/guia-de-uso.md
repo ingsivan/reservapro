@@ -34,7 +34,7 @@ En la pantalla de confirmación y en la página de tu cita:
 
 ### Ver, cambiar o cancelar tu cita
 
-- Abre el enlace **Ver o cancelar mi cita** del correo. No necesitas contraseña: el enlace está firmado y solo sirve para esa cita.
+- Abre el enlace **Ver, cambiar o cancelar mi cita** del correo. No necesitas contraseña: el enlace está firmado y solo sirve para esa cita.
 - **Cambiar horario:** elige otro día y hora libres y pulsa **Cambiar mi cita**. El negocio recibe un aviso con el horario anterior y el nuevo. Tu cita conserva su código y su estado.
 - **Cancelar mi cita:** confirma en la ventana. El negocio recibe un aviso y el horario queda libre.
 - Solo puedes cambiar o cancelar en línea hasta cierto tiempo antes (2 horas en la demo). Después, la página te muestra el teléfono del negocio.

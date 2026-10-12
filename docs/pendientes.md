@@ -14,12 +14,13 @@ Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué re
 - [x] Recuperar contraseña por correo
 - [x] Reprogramar una cita desde el enlace del cliente y desde el panel de la cita en la agenda
 - [x] Crear citas desde el panel, con correo opcional
+- [x] Correos con la marca de ReservaPro y todos los textos en español
 
 ## Prioridad alta
 
 Funciones que un negocio real pediría el primer día.
 
-- [ ] **Correos con la marca del negocio.** Los correos usan la plantilla estándar de Laravel. Publicarla (`php artisan vendor:publish --tag=laravel-mail`) y darle los colores y el logo de ReservaPro.
+Ya están todas hechas (ver arriba). Lo siguiente es la prioridad media.
 
 ## Prioridad media
 

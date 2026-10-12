@@ -224,7 +224,7 @@ class Appointment extends Model
 
     private function calendarDescription(): string
     {
-        return "Código de tu cita: {$this->code}\nVer o cancelar: {$this->manageUrl()}";
+        return "Código de tu cita: {$this->code}\nVer, cambiar o cancelar: {$this->manageUrl()}";
     }
 
     /**

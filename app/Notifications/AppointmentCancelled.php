@@ -41,7 +41,6 @@ class AppointmentCancelled extends Notification implements ShouldQueue
         }
 
         return (new MailMessage)
-            ->error()
             ->subject("Tu cita en {$appointment->business->name} fue cancelada")
             ->greeting("Hola, {$appointment->customer_name}")
             ->line("{$appointment->business->name} tuvo que cancelar tu cita de {$appointment->service->name} del {$appointment->whenLabel()}.")
