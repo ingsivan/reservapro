@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DemoLoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ManageAppointmentController;
+use App\Http\Controllers\ProgressiveWebAppController;
 use App\Livewire\Admin\Agenda;
 use App\Livewire\Admin\BusinessSettings;
 use App\Livewire\Admin\Reports;
@@ -20,6 +21,8 @@ use App\Livewire\RescheduleAppointment;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/manifest.webmanifest', [ProgressiveWebAppController::class, 'manifest'])->name('manifest');
+Route::get('/app', [ProgressiveWebAppController::class, 'open'])->name('app.open');
 
 Route::livewire('/reservar/{business}', BookingWizard::class)->name('booking');
 

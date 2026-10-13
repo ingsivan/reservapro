@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? "{$title} · ReservaPro" : 'ReservaPro · Reservaciones en línea' }}</title>
     <meta name="description" content="Reservaciones en línea para negocios de servicios: horarios, citas, confirmaciones y recordatorios por correo.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><rect x='7' y='9' width='18' height='16' rx='2.5' stroke='white' stroke-width='2.2' fill='none'/><path d='M7 14h18M12 6.5v4M20 6.5v4' stroke='white' stroke-width='2.2' stroke-linecap='round'/></svg>">
+    <x-app-meta />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>

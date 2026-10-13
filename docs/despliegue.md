@@ -17,6 +17,8 @@ Al arrancar, `docker/start.sh`:
 3. Lanza el worker de la cola (correos y WhatsApp) y el scheduler (recordatorios) en segundo plano.
 4. Sirve la web con `php artisan serve` y 4 workers (`WEB_WORKERS`).
 
+La app instalable (PWA) no necesita configuración: el manifiesto lo genera Laravel y `public/sw.js` se sirve como archivo estático. Los navegadores solo permiten instalarla con HTTPS (Render lo da) o en `localhost`. Si cambias `sw.js` de forma que deba descartar lo guardado, sube la versión en `CACHE`.
+
 Todo en un solo contenedor, porque el plan gratuito de Render no incluye workers aparte. CI construye esta imagen y comprueba que `/up` y la página de inicio respondan en cada PR.
 
 ## Render paso a paso (gratis)
