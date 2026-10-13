@@ -130,6 +130,8 @@ Además, `isAvailable()` vuelve a calcular los horarios en lugar de confiar en l
 | `App\Notifications\Channels\WhatsAppChannel` | Canal de notificaciones propio: manda la plantilla a la API de WhatsApp Cloud con el cliente HTTP de Laravel, o la escribe en el log si no hay credenciales. |
 | `App\Notifications\Messages\WhatsAppMessage` | Nombre de la plantilla y sus parámetros; `TEMPLATES` guarda el texto de cada una para el log y para darlas de alta en Meta. |
 | `App\Notifications\Concerns\ReachesCustomers` | `via()` compartido de los avisos al cliente: correo si hay correo, WhatsApp si lo pidió. `Appointment::notifyCustomer()` arma las rutas. |
+| `App\Http\Controllers\ProgressiveWebAppController` | Manifiesto de la app (`/manifest.webmanifest`) y `/app`, donde abre la app instalada: la agenda del dueño, las citas del cliente o el inicio de sesión. |
+| `public/sw.js` | Service worker: guarda en caché los assets de Vite y los íconos, y muestra `public/offline.html` si no hay conexión. Las páginas y las peticiones de Livewire siempre van a la red. |
 | `App\Support\PhoneNumber` | Convierte el celular a formato E.164 (+52 por defecto) y arma el enlace `wa.me`. |
 
 ## Pruebas

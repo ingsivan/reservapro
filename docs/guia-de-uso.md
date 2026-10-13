@@ -111,6 +111,15 @@ Si escribes el correo, el cliente recibe la confirmación, el recordatorio y el 
 - **Por servicio** ordena tus servicios por lo que dejan y su parte del total.
 - **Exportar CSV** descarga las citas del periodo (código, fecha, horario, servicio, cliente, contacto, estado, precio y notas) para abrirlas en Excel, Numbers o Google Sheets.
 
+### Instalar la app en tu celular
+
+ReservaPro se puede instalar como una app, con su ícono en la pantalla de inicio. Se abre en su propia ventana, sin barra del navegador, y entra directo a tu agenda.
+
+- **Android (Chrome) y computadora (Chrome o Edge):** en el panel, toca **Instalar la app** (en el celular es el ícono de descarga junto al nombre de tu negocio) y confirma. También puedes usar el menú del navegador: **Instalar app** o **Agregar a la pantalla principal**.
+- **iPhone y iPad (Safari):** toca **Compartir** y luego **Agregar a inicio**. El botón del panel te recuerda estos pasos.
+
+La app necesita internet para mostrar la agenda al día. Sin conexión verás un aviso con un botón para reintentar.
+
 ### Ajustes
 
 **Imagen de tu página:** sube tu logo (cuadrado, de al menos 96 px) y una foto de portada (horizontal, de al menos 800 × 200 px) en JPG, PNG o WebP. Se guardan al elegirlas y se ven en tu página de reservas y en el menú del panel. Si no subes logo, se muestran tus iniciales.
