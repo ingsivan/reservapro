@@ -38,6 +38,8 @@ Están en `resources/views/components`.
 | `x-admin.appointment-actions` | Botones según el estado de la cita: confirmar, reprogramar, cancelar, atendida o no asistió. | `<x-admin.appointment-actions :appointment="$appointment" />` |
 | `x-logo` | Logo de ReservaPro. | — |
 | `x-staff-avatar` | Iniciales de una persona del equipo sobre su color. | `<x-staff-avatar :staff-member="$person" class="size-7 text-xs" />` |
+| `x-app-meta` | Ícono, manifiesto, color del tema e ícono de iPhone para instalar la app. Va en el `<head>` de los dos layouts. | `<x-app-meta />` |
+| `x-install-app` | Botón «Instalar la app»: abre el aviso de instalación del navegador o, en iPhone, explica cómo agregarla a inicio. Se oculta si no se puede instalar o si ya está instalada. `compact` lo muestra solo como icono. | `<x-install-app compact />` |
 | `x-staff-picker` | "¿Con quién?": "Quien esté libre" y una opción por persona. Llama al método `select` de Livewire (por defecto `selectStaff`). Se usa en la reserva y en Nueva cita. | `<x-staff-picker :staff="$this->staffOptions" :selected="$staffMemberId" />` |
 | `x-business-avatar` | Logo del negocio, o sus iniciales sobre un cuadro oscuro si no tiene. El tamaño y la forma van en `class`. | `<x-business-avatar :business="$business" class="size-9 rounded-lg" />` |
 
@@ -98,7 +100,7 @@ stateDiagram-v2
 
 ### Panel del negocio
 
-- **Menú lateral** en pantallas grandes y pestañas con iconos en el celular. Incluye el enlace a la página de reservas con un botón para copiarlo.
+- **Menú lateral** en pantallas grandes y pestañas con iconos en el celular. Incluye el enlace a la página de reservas con un botón para copiarlo y el botón **Instalar la app** (en el celular, un icono de descarga en la barra superior).
 - **Agenda:**
   - Métricas de la semana, filtros por estado y, con equipo, por persona (`?equipo=3`).
   - Cada bloque lleva un punto con el color de quien atiende. Las citas que se cruzan se reparten el ancho del día (`CalendarLayout`); con tres o más a la vez, el bloque solo muestra el punto y el detalle va en el `title`.

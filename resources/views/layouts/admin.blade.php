@@ -20,7 +20,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? "{$title} · Panel · ReservaPro" : 'Panel · ReservaPro' }}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><rect x='7' y='9' width='18' height='16' rx='2.5' stroke='white' stroke-width='2.2' fill='none'/><path d='M7 14h18M12 6.5v4M20 6.5v4' stroke='white' stroke-width='2.2' stroke-linecap='round'/></svg>">
+    <x-app-meta />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -65,6 +65,8 @@
             </div>
         </div>
 
+        <x-install-app class="px-3 pb-3" />
+
         <div class="flex items-center gap-3 border-t border-slate-100 px-5 py-4">
             <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
             <span class="min-w-0 flex-1">
@@ -88,6 +90,7 @@
                 <span class="truncate">{{ $business->name }}</span>
             </a>
             <div class="flex shrink-0 items-center gap-1 text-sm">
+                <x-install-app compact />
                 <a href="{{ $bookingUrl }}" target="_blank" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900" aria-label="Ver página pública" title="Ver página pública">
                     <x-icon name="external" class="size-5" />
                 </a>

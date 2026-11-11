@@ -19,6 +19,7 @@ Lo que falta o se puede mejorar, ordenado por prioridad. Cada punto dice qué re
 - [x] Reportes de ingresos y citas por mes y por servicio, con exportación a CSV
 - [x] Varios empleados por negocio, cada uno con su agenda, sus servicios y su horario
 - [x] Avisos por WhatsApp (confirmación, recordatorio, cambio y cancelación) con la API de WhatsApp Cloud
+- [x] Instalar como app (PWA): manifiesto, íconos, service worker, página sin conexión y botón «Instalar la app» en el panel
 
 ## Prioridad alta
 
@@ -44,7 +45,6 @@ Detalles que mejoran la experiencia.
 - [ ] **Interfaz en inglés.** Hoy los textos están escritos en las vistas. Moverlos a `lang/es` y `lang/en` con `__()`.
 - [ ] **Lista de espera** cuando un día está lleno: avisar por correo si se libera un horario.
 - [ ] **Reseñas** después de una cita atendida, visibles en la página del negocio.
-- [ ] **Instalar como app (PWA)** con un manifiesto e iconos, para que el dueño abra la agenda desde la pantalla de inicio del celular.
 
 ## Técnico
 
