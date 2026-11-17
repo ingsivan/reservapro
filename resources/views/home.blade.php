@@ -1,81 +1,100 @@
 <x-layouts::app>
     {{-- Hero --}}
-    <section class="relative grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
-        <div aria-hidden="true" class="pointer-events-none absolute -top-24 left-1/2 -z-10 h-80 w-full max-w-3xl -translate-x-1/2 rounded-full bg-teal-200/40 blur-3xl"></div>
+    <section class="relative left-1/2 -mt-8 w-screen -translate-x-1/2 overflow-hidden bg-slate-950 sm:-mt-12">
+        <img
+            src="{{ asset('images/hero-peluqueria.webp') }}"
+            srcset="{{ asset('images/hero-peluqueria-960.webp') }} 960w, {{ asset('images/hero-peluqueria.webp') }} 1920w"
+            sizes="100vw"
+            alt=""
+            fetchpriority="high"
+            class="absolute inset-0 size-full object-cover object-center opacity-60"
+        >
+        <div aria-hidden="true" class="absolute inset-0 bg-linear-to-r from-slate-950 via-slate-950/85 to-slate-950/30"></div>
+        <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-slate-950/80 to-transparent"></div>
+        <div aria-hidden="true" class="absolute -top-32 -left-32 size-96 rounded-full bg-teal-500/25 blur-3xl"></div>
 
-        <div class="text-center lg:text-left">
-            <p class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-teal-800 shadow-sm ring-1 ring-teal-600/20">
-                <x-icon name="sparkles" class="size-4 text-teal-600" /> Laravel 13 · Livewire 4 · Tailwind CSS 4
-            </p>
-            <h1 class="mt-6 text-4xl font-bold tracking-tight text-balance text-slate-900 sm:text-5xl lg:text-6xl">
-                Tus clientes reservan solos. <span class="text-teal-600">Tú solo atiendes.</span>
-            </h1>
-            <p class="mx-auto mt-5 max-w-xl text-lg text-pretty text-slate-600 lg:mx-0">
-                Un sistema de citas para barberías, consultorios y estudios. Tus clientes eligen servicio, día y hora libre; tú lo ves todo en una agenda semanal. Y nadie reserva dos veces el mismo horario.
-            </p>
-            <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-                @if ($demoBusiness)
-                    <a href="{{ route('booking', $demoBusiness) }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white shadow-lg shadow-teal-600/25 hover:bg-teal-500">
-                        Reservar en el negocio demo <x-icon name="arrow-right" class="size-4" />
-                    </a>
-                @endif
-                @guest
-                    <form method="POST" action="{{ route('demo.login') }}">
-                        @csrf
-                        <button class="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">Entrar como admin demo</button>
-                    </form>
-                @else
-                    <a href="{{ auth()->user()->homeRoute() }}" class="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">Ir a mi cuenta</a>
-                @endguest
-            </div>
-            <p class="mt-4 text-sm text-slate-500">Sin registro: prueba la reserva como cliente y el panel como dueño del negocio.</p>
-        </div>
-
-        {{-- Product preview --}}
-        <div class="relative mx-auto w-full max-w-md" aria-hidden="true">
-            <div class="absolute -inset-4 -z-10 rotate-3 rounded-3xl bg-linear-to-br from-teal-500 to-emerald-400 opacity-90"></div>
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
-                <div class="relative h-16 bg-linear-to-br from-teal-700 via-teal-500 to-emerald-400"><div class="bg-dots absolute inset-0"></div></div>
-                <div class="px-5 pb-5">
-                    <div class="relative -mt-7 flex items-end gap-3">
-                        <span class="flex size-14 items-center justify-center rounded-xl border-4 border-white bg-slate-900 text-lg font-bold text-white">BC</span>
-                        <div class="pb-1">
-                            <p class="font-semibold text-slate-900">Barbería El Clásico</p>
-                            <p class="flex items-center gap-1.5 text-xs text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span> Abierto · cierra a las 20:00</p>
-                        </div>
-                    </div>
-                    <div class="mt-5 rounded-xl border border-teal-600 bg-teal-50/60 p-3 ring-1 ring-teal-600">
-                        <div class="flex items-center justify-between text-sm"><span class="font-semibold text-slate-900">Corte y barba</span><span class="font-semibold">$320.00</span></div>
-                        <p class="mt-1 flex items-center gap-1 text-xs text-slate-500"><x-icon name="clock" class="size-3.5" /> 1 h</p>
-                    </div>
-                    <div class="mt-4 grid grid-cols-5 gap-1.5 text-center">
-                        @foreach (['LUN' => 12, 'MAR' => 13, 'MIÉ' => 14, 'JUE' => 15, 'VIE' => 16] as $dayName => $dayNumber)
-                            <div @class(['rounded-lg border py-1.5', 'border-teal-600 bg-teal-600 text-white' => $dayNumber === 13, 'border-slate-200 text-slate-700' => $dayNumber !== 13])>
-                                <p class="text-[0.6rem] font-medium">{{ $dayName }}</p>
-                                <p class="text-sm font-bold">{{ $dayNumber }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-4 grid grid-cols-4 gap-1.5 text-center text-xs font-semibold">
-                        @foreach (['10:00', '11:30', '12:00', '13:00', '16:30', '17:00', '18:00', '19:00'] as $time)
-                            <span @class(['rounded-md border py-1.5', 'border-teal-600 bg-teal-600 text-white' => $time === '12:00', 'border-slate-200 text-slate-600' => $time !== '12:00'])>{{ $time }}</span>
-                        @endforeach
-                    </div>
-                    <div class="mt-4 rounded-lg bg-slate-900 py-2.5 text-center text-sm font-semibold text-white">Confirmar reserva · $320.00</div>
+        <div class="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-20 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:pt-20 lg:pb-24">
+            <div class="text-center lg:text-left">
+                <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-teal-200 ring-1 ring-white/20 backdrop-blur">
+                    <x-icon name="sparkles" class="size-4 text-teal-300" /> Para peluquerías, barberías y estéticas
+                </p>
+                <h1 class="mt-6 text-4xl font-bold tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
+                    Tus clientes reservan solos. <span class="block text-teal-300">Tú te dedicas a cortar.</span>
+                </h1>
+                <p class="mx-auto mt-5 max-w-xl text-lg text-pretty text-slate-300 lg:mx-0">
+                    Tus clientes eligen servicio, estilista, día y hora desde el celular, a cualquier hora. Tú ves todas las citas en una agenda y ellos reciben su recordatorio por correo y WhatsApp para que no falten.
+                </p>
+                <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+                    @if ($demoBusiness)
+                        <a href="{{ route('booking', $demoBusiness) }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-5 py-3 font-semibold text-white shadow-lg shadow-teal-500/30 hover:bg-teal-400">
+                            Probar una reserva <x-icon name="arrow-right" class="size-4" />
+                        </a>
+                    @endif
+                    @guest
+                        <form method="POST" action="{{ route('demo.login') }}">
+                            @csrf
+                            <button class="w-full rounded-xl bg-white/10 px-5 py-3 font-semibold text-white ring-1 ring-white/25 backdrop-blur hover:bg-white/20">Ver el panel del negocio</button>
+                        </form>
+                    @else
+                        <a href="{{ auth()->user()->homeRoute() }}" class="rounded-xl bg-white/10 px-5 py-3 font-semibold text-white ring-1 ring-white/25 backdrop-blur hover:bg-white/20">Ir a mi cuenta</a>
+                    @endguest
                 </div>
+                <ul class="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-300 lg:justify-start">
+                    @foreach (['Reserva en 3 pasos', 'Sin crear cuenta', 'Cero citas encimadas'] as $highlight)
+                        <li class="flex items-center gap-1.5"><x-icon name="check-circle" class="size-4 text-teal-300" /> {{ $highlight }}</li>
+                    @endforeach
+                </ul>
             </div>
-            <div class="absolute -bottom-6 -left-6 hidden items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-xl ring-1 ring-slate-200 sm:flex">
-                <span class="flex size-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"><x-icon name="check" class="size-5" /></span>
-                <span class="text-sm">
-                    <span class="block font-semibold text-slate-900">¡Cita confirmada!</span>
-                    <span class="block text-xs text-slate-500">Te enviamos los detalles por correo</span>
-                </span>
+
+            {{-- Product preview --}}
+            <div class="relative mx-auto w-full max-w-md" aria-hidden="true">
+                <div class="absolute -inset-3 -z-10 rotate-3 rounded-3xl bg-linear-to-br from-teal-400 to-emerald-300 opacity-80"></div>
+                <div class="overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/40">
+                    <div class="relative h-14 bg-linear-to-br from-teal-700 via-teal-500 to-emerald-400"><div class="bg-dots absolute inset-0"></div></div>
+                    <div class="px-5 pb-5">
+                        <div class="relative -mt-7 flex items-start gap-3">
+                            <span class="flex size-14 shrink-0 items-center justify-center rounded-xl border-4 border-white bg-slate-900 text-lg font-bold text-white">BC</span>
+                            <div class="min-w-0 pt-8">
+                                <p class="truncate font-semibold text-slate-900">Barbería El Clásico</p>
+                                <p class="flex items-center gap-1.5 text-xs text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span> Abierto · cierra a las 20:00</p>
+                            </div>
+                        </div>
+                        <div class="mt-5 rounded-xl border border-teal-600 bg-teal-50/60 p-3 ring-1 ring-teal-600">
+                            <div class="flex items-center justify-between text-sm"><span class="font-semibold text-slate-900">Corte y barba</span><span class="font-semibold">$320.00</span></div>
+                            <p class="mt-1 flex items-center gap-1 text-xs text-slate-500"><x-icon name="clock" class="size-3.5" /> 1 h · con Luis</p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-5 gap-1.5 text-center">
+                            @foreach (['LUN' => 12, 'MAR' => 13, 'MIÉ' => 14, 'JUE' => 15, 'VIE' => 16] as $dayName => $dayNumber)
+                                <div @class(['rounded-lg border py-1.5', 'border-teal-600 bg-teal-600 text-white' => $dayNumber === 13, 'border-slate-200 text-slate-700' => $dayNumber !== 13])>
+                                    <p class="text-[0.6rem] font-medium">{{ $dayName }}</p>
+                                    <p class="text-sm font-bold">{{ $dayNumber }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-4 grid grid-cols-4 gap-1.5 text-center text-xs font-semibold">
+                            @foreach (['10:00', '11:30', '12:00', '13:00', '16:30', '17:00', '18:00', '19:00'] as $time)
+                                <span @class(['rounded-md border py-1.5', 'border-teal-600 bg-teal-600 text-white' => $time === '12:00', 'border-slate-200 text-slate-600' => $time !== '12:00'])>{{ $time }}</span>
+                            @endforeach
+                        </div>
+                        <div class="mt-4 rounded-lg bg-slate-900 py-2.5 text-center text-sm font-semibold text-white">Confirmar reserva · $320.00</div>
+                    </div>
+                </div>
+                <div class="absolute -bottom-7 -left-6 hidden items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-xl ring-1 ring-slate-200 sm:flex">
+                    <span class="flex size-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"><x-icon name="check" class="size-5" /></span>
+                    <span class="text-sm">
+                        <span class="block font-semibold text-slate-900">¡Cita confirmada!</span>
+                        <span class="block text-xs text-slate-500">Mar 13 · 12:00 · recordatorio por WhatsApp</span>
+                    </span>
+                </div>
+                <div class="absolute -top-5 -right-3 hidden items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-lg ring-1 ring-slate-200 sm:flex">
+                    <x-icon name="bell" class="size-4 text-teal-600" /> Nueva cita · 12:00
+                </div>
             </div>
         </div>
     </section>
 
     {{-- How it works --}}
-    <section class="mt-28">
+    <section class="mt-20">
         <div class="text-center">
             <p class="text-sm font-semibold tracking-wide text-teal-700 uppercase">Cómo funciona</p>
             <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-900">Una reserva en menos de un minuto</h2>

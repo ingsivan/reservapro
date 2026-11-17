@@ -23,7 +23,7 @@ class DemoDataTest extends TestCase
 
         $this->assertSame(5, $business->services()->count());
         $this->assertGreaterThan(20, $business->appointments()->count());
-        $this->get('/')->assertOk()->assertSee('Reservar en el negocio demo');
+        $this->get('/')->assertOk()->assertSee('Probar una reserva');
         $this->get(route('booking', $business))->assertOk()->assertSee('Corte y barba')->assertSee($business->logoUrl(), escape: false);
         Storage::disk('public')->assertExists([$business->logo_path, $business->cover_path]);
     }
